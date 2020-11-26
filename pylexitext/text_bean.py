@@ -1,5 +1,12 @@
 from nltk.cluster.util import cosine_distance
 import numpy as np
+import nltk.corpus
+from nltk.probability import FreqDist
+from nltk.stem import WordNetLemmatizer
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+from nltk import ne_chunk
+from nltk import RegexpParser
 
 def __sentence_similarity(sent1, sent2, stopwords=None):
   if stopwords is None:
@@ -46,3 +53,34 @@ def read_text(text):
   sentences.pop()
 
   return sentences
+
+def post_text_process(text):
+  """
+    Performs a post process with the text, preparing it for text deep analysis
+    or other purposes.
+  """
+  # Splits words to tokens
+  tokenized_word = word_tokenize(text.lower())
+
+  # Normalize words to normal form
+  # aka: playing -> play
+  lemmatizer = WordNetLemmatizer()
+  lemmatized_words = []
+  for word in tokenized_word:
+    lemmatized_words.append(lemmatizer.lemmatize(word))
+  
+  # Remove stopwords from the set
+  stopwords_set = set(stopwords.words('english'))
+  stopwords_set.add('.')
+  stopwords_text = [word for word in lemmatized_words if word not in stopwords_set]
+
+  # Named entity recognition
+  tags = nltk.pos_tag(stopwords_text)
+  chunk = ne_chunk(tags)
+
+  chunking_rule = "NP: {<DT>?<JJ>*<NN>}"
+  chunking_text_parsed = RegexpParser(chunking_rule)
+  chunking_result = chunking_text_parsed.parse(tags)
+
+  # Returns important information created by the post processing
+  return chunking_result, chunk
