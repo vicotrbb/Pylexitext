@@ -2,6 +2,7 @@ from nltk.corpus import stopwords
 import networkx as nx
 import text_bean as bean 
 import plots as plt
+from nltk.probability import FreqDist
 
 class Text:
 
@@ -41,6 +42,7 @@ class Text:
     self.text_sentences_number = len(self.text.split('.'))
     self.number_stopwords = len(set(self.is_stopwords_text))
     self.lexical_diversity = len(set(self.stopwords_text)) / len(self.stopwords_text) * 100
+    self.fdist = FreqDist(self.stopwords_text)
   
   def split_by(self, bias):
     text_chunks = []
@@ -60,6 +62,10 @@ class Text:
     pass
   
   def word_frequency_plot(self):
+    """
+    Plots a word frequency line plot.
+    """
+    plt.word_frequency_plot(self.fdist)
     pass
   
   def lexical_tree(self):
