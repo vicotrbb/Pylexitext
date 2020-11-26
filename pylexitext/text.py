@@ -1,6 +1,7 @@
 from nltk.corpus import stopwords
 import networkx as nx
 import text_bean as bean 
+import plots as plt
 
 class Text:
 
@@ -52,6 +53,10 @@ class Text:
     pass
   
   def word_cloud(self):
+    """
+    Plots a word frequency cloud.
+    """
+    plt.word_cloud(self.stop_words, self.text)
     pass
   
   def word_frequency_plot(self):
