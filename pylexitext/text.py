@@ -27,7 +27,18 @@ class Text:
         * Number of sentences
         * Lexical diversity (%)
     """
-    pass
+    return {
+      "text_size": self.text_size,
+      "text_words_number": self.text_words_number,
+      "non_stop_words": self.stopwords_text,
+      "stop_words": self.is_stopwords_text,
+      "stop_words_number": self.number_stopwords,
+      "unique_words": self.text_uniques_number,
+      "sentences": self.text_sentences,
+      "number_senteces": self.text_sentences_number,
+      "lexical_diversity": self.lexical_diversity,
+      "frequency_distribution": self.fdist
+    }
   
   def __generate_stop_words(self):
     self.stopwords_set = set(stopwords.words('english'))
@@ -39,7 +50,8 @@ class Text:
     self.stopwords_text = [word for word in self.text.split(' ') if word not in self.stopwords_set]
     self.is_stopwords_text = [word for word in self.text.split(' ') if word in self.stopwords_set]
     self.text_uniques_number = len(set(self.stopwords_text))
-    self.text_sentences_number = len(self.text.split('.'))
+    self.text_sentences = self.text.split('.')
+    self.text_sentences_number = len(self.sentences)
     self.number_stopwords = len(set(self.is_stopwords_text))
     self.lexical_diversity = len(set(self.stopwords_text)) / len(self.stopwords_text) * 100
     self.fdist = FreqDist(self.stopwords_text)
