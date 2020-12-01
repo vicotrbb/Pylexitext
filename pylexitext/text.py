@@ -29,7 +29,7 @@ class Text:
     """
     return {
       "text_size": self.text_size,
-      "text_words_number": self.text_words_number,
+      "total_words": self.total_words,
       "non_stop_words": self.stopwords_text,
       "stop_words": self.is_stopwords_text,
       "stop_words_number": self.number_stopwords,
@@ -46,7 +46,8 @@ class Text:
 
   def extract_features(self):
     self.text_size = len(self.text)
-    self.text_words_number = len(self.text.split(' '))
+    self.words = self.text.split(' ')
+    self.total_words = len(self.words)
     self.stopwords_text = [word for word in self.text.split(' ') if word not in self.stopwords_set]
     self.is_stopwords_text = [word for word in self.text.split(' ') if word in self.stopwords_set]
     self.text_uniques_number = len(set(self.stopwords_text))
@@ -55,6 +56,8 @@ class Text:
     self.number_stopwords = len(set(self.is_stopwords_text))
     self.lexical_diversity = len(set(self.stopwords_text)) / len(self.stopwords_text) * 100
     self.fdist = FreqDist(self.stopwords_text)
+    for y in self.words:
+      self.total_syllables += bean.syllable_count(y)
   
   def split_by(self, bias):
     text_chunks = []
@@ -68,14 +71,14 @@ class Text:
   
   def word_cloud(self):
     """
-    Plots a word frequency cloud.
+      Plots a word frequency cloud.
     """
     plt.word_cloud(self.stop_words, self.text)
     pass
   
   def word_frequency_plot(self):
     """
-    Plots a word frequency line plot.
+      Plots a word frequency line plot.
     """
     plt.word_frequency_plot(self.fdist)
     pass
@@ -84,6 +87,10 @@ class Text:
     pass
 
   def summarize(self, top_n=3):
+    """
+      Extracts a n chunk summary from the main text.
+      Default n chunks = 3
+    """
     stop_words = stopwords.words(self.language)
     summarize_text = []
     sentences =  bean.read_text(self.text)
@@ -98,4 +105,9 @@ class Text:
     for i in range(top_n):
       summarize_text.append(" ".join(ranked_sentence[i][1]))
 
-    print("Summarize Text: \n", ". ".join(summarize_text))
+    self.summary = ". ".join(summarize_text)
+    return self.summary
+  
+  def flesch_reading_ease(self):
+    return 206.835 - (1.015*(self.total_words/self.text_sentences)) - (84.7*(self.total_syllables/self.total_words))
+  
