@@ -47,7 +47,6 @@ def read_text(text):
   sentences = []
 
   for sentence in article:
-      print(sentence)
       sentences.append(sentence.replace("[^a-zA-Z]", " ").split(" "))
   sentences.pop()
 
