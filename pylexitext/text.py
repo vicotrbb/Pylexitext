@@ -3,6 +3,7 @@ import networkx as nx
 import text_bean as bean 
 import plots as plt
 from nltk.probability import FreqDist
+import numpy as np
 
 class Text:
 
@@ -26,6 +27,8 @@ class Text:
         * Number of unique words
         * Number of sentences
         * Lexical diversity (%)
+        * Total syllables
+        * Total polysyllables
     """
     return {
       "text_size": self.text_size,
@@ -37,7 +40,9 @@ class Text:
       "sentences": self.text_sentences,
       "number_senteces": self.text_sentences_number,
       "lexical_diversity": self.lexical_diversity,
-      "frequency_distribution": self.fdist
+      "frequency_distribution": self.fdist,
+      "total_syllables": self.total_syllables,
+      "total_polysyllables": self.total_polysyllables
     }
   
   def __generate_stop_words(self):
@@ -57,8 +62,12 @@ class Text:
     self.lexical_diversity = len(set(self.stopwords_text)) / len(self.stopwords_text) * 100
     self.fdist = FreqDist(self.stopwords_text)
     for y in self.words:
-      self.total_syllables += bean.syllable_count(y)
-  
+      syllable_count_temp = bean.syllable_count(y)
+      self.total_syllables += syllable_count_temp
+
+      if syllable_count_temp >= 3:
+        self.total_polysyllables += 1
+
   def split_by(self, bias):
     text_chunks = []
 
@@ -99,9 +108,8 @@ class Text:
     sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_martix)
     scores = nx.pagerank(sentence_similarity_graph)
 
-    ranked_sentence = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)    
-    print("Indexes of top ranked_sentence order are ", ranked_sentence)    
-
+    ranked_sentence = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
+    
     for i in range(top_n):
       summarize_text.append(" ".join(ranked_sentence[i][1]))
 
@@ -109,5 +117,13 @@ class Text:
     return self.summary
   
   def flesch_reading_ease(self):
-    return 206.835 - (1.015*(self.total_words/self.text_sentences)) - (84.7*(self.total_syllables/self.total_words))
+    return 206.835 - (1.015*(self.total_words/self.text_sentences_number)) - (84.7*(self.total_syllables/self.total_words))
   
+  def flesch_kincaid_grade_level(self):
+    return (0.39*(self.total_words/self.text_sentences_number)) + (11.8*(self.total_syllables/self.total_words)) - 15.59
+  
+  def smog(self):
+    return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
+
+  def gunning_fog_index(self):
+    return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
