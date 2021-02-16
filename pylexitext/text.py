@@ -9,12 +9,18 @@ import numpy as np
 class Text:
 
     def __init__(self, text, language='english'):
+        if type(text) is not str:
+            raise TypeError("Entry must be an String")
+
         self.text = text
         self.language = language
 
         # Kickstart methods
         self.__generate_stop_words()
-        self.extract_features()
+        self.__extract_features()
+
+    def __repr__(self) -> str:
+        return self.describe()
 
     def describe(self, verbose=False):
         """
@@ -35,7 +41,6 @@ class Text:
             * smog score
             * gunning fog index score
         """
-        self.extract_features()
         description = {
             "text_size": self.text_size,
             "total_words": self.total_words,
@@ -64,7 +69,7 @@ class Text:
         self.stopwords_set = set(stopwords.words('english'))
         self.stopwords_set.add('.')
 
-    def extract_features(self):
+    def __extract_features(self):
         self.text_size = len(self.text)
         self.words = self.text.split(' ')
         self.total_words = len(self.words)

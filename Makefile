@@ -21,7 +21,7 @@ clean:
 # DEVELOPMENT
 
 define create-venv
-virtualenv venv -p python3
+python3 -m venv venv
 endef
 
 venv:
