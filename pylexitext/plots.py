@@ -12,3 +12,7 @@ def word_cloud(stopwords, text):
 def word_frequency_plot(fdist):
     fdist.plot(25, cumulative=False)
     plt.show()
+
+
+def dependency_trees(graph):
+    pass

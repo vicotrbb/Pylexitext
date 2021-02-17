@@ -2,6 +2,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
 def vader_sentiment_analysis(text, verbose=False):
+    print('Using vader...')
     sid = SentimentIntensityAnalyzer()
     scores = sid.polarity_scores(text)
 

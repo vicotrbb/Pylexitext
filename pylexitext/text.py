@@ -4,6 +4,7 @@ from . import text_bean as bean
 from . import plots as plt
 from nltk.probability import FreqDist
 import numpy as np
+from spellchecker import SpellChecker
 
 
 class Text:
@@ -106,7 +107,13 @@ class Text:
         return text_chunks
 
     def misspeled(self):
-        pass
+        """
+            Return an array with all the misspelled words of the text.
+        """
+        print('')
+        spell = SpellChecker()
+        misspelled = spell.unknown(self.stopwords_text)
+        return misspelled
 
     def word_cloud(self):
         """
@@ -153,6 +160,21 @@ class Text:
 
         return self.summary
 
+    def named_entity_recognition(self):
+        pass
+
+    def speech_tagging(self):
+        pass
+
+    def topics_modeling(self):
+        pass
+
+    def __ngrams(self):
+        pass
+
+    # ----------------------------------------- 
+    # Readibility of the text
+    # -----------------------------------------
     def flesch_reading_ease(self):
         return 206.835 - (1.015*(self.total_words/self.text_sentences_number)) - (84.7*(self.total_syllables/self.total_words))
 
@@ -164,3 +186,7 @@ class Text:
 
     def gunning_fog_index(self):
         return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
+
+    # ----------------------------------------- 
+    # Statistics methods
+    # -----------------------------------------
