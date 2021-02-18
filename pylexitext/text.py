@@ -14,7 +14,8 @@ class Text:
     def __init__(self, text, language='english'):
         if type(text) is not str:
             raise TypeError("Entry must be an String")
-
+        
+        self.raw_text = text
         self.text = text
         self.language = language
 
@@ -144,7 +145,7 @@ class Text:
         """
         stop_words = stopwords.words(self.language)
         summarize_text = []
-        sentences = bean.read_text(self.text)
+        sentences = bean.read_text(self.raw_text)
 
         sentence_similarity_martix = bean.build_similarity_matrix(
             sentences, stop_words)
