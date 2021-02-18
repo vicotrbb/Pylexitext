@@ -4,7 +4,8 @@ from . import text_bean as bean
 from . import plots as plt
 from nltk.probability import FreqDist
 import numpy as np
-from spellchecker import SpellChecker
+# from spellchecker import SpellChecker
+from nltk import word_tokenize, pos_tag
 
 
 class Text:
@@ -25,7 +26,7 @@ class Text:
 
     def describe(self, verbose=False):
         """
-          Describes all the text features:
+            Describes all the text features:
             * Text size
             * Number of words
             * List of stopwords
@@ -106,14 +107,14 @@ class Text:
 
         return text_chunks
 
-    def misspeled(self):
-        """
-            Return an array with all the misspelled words of the text.
-        """
-        print('')
-        spell = SpellChecker()
-        misspelled = spell.unknown(self.stopwords_text)
-        return misspelled
+    # def misspeled(self):
+    #     """
+    #         Return an array with all the misspelled words of the text.
+    #     """
+    #     print('')
+    #     spell = SpellChecker()
+    #     misspelled = spell.unknown(self.stopwords_text)
+    #     return misspelled
 
     def word_cloud(self):
         """
@@ -160,11 +161,22 @@ class Text:
 
         return self.summary
 
+    def sentiment_analysis(self, verbose=False, method='vader'):
+        if method == 'vader':
+            from . import sentiment
+
+            return sentiment.vader_sentiment_analysis(self.text, verbose)
+
+        else:
+            pass
+
     def named_entity_recognition(self):
         pass
 
     def speech_tagging(self):
-        pass
+        tokens = word_tokenize(self.text)
+        self.pos = pos_tag(tokens)
+        return self.pos
 
     def topics_modeling(self):
         pass
@@ -172,7 +184,7 @@ class Text:
     def __ngrams(self):
         pass
 
-    # ----------------------------------------- 
+    # -----------------------------------------
     # Readibility of the text
     # -----------------------------------------
     def flesch_reading_ease(self):
@@ -187,6 +199,6 @@ class Text:
     def gunning_fog_index(self):
         return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
 
-    # ----------------------------------------- 
+    # -----------------------------------------
     # Statistics methods
     # -----------------------------------------

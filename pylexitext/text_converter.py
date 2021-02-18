@@ -74,9 +74,13 @@ def from_video_to_text(video_path, source='youtube') -> text.Text:
         return
 
 
-def from_podcast_to_text(url, source='spotfy') -> text.Text:
+def from_podcast_to_text(url, source='spotify') -> text.Text:
     pass
 
 
 def text_to_sound(text):
+    pass
+
+
+def sound_to_text(text):
     pass
