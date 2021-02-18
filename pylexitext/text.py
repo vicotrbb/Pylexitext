@@ -6,6 +6,7 @@ from nltk.probability import FreqDist
 import numpy as np
 # from spellchecker import SpellChecker
 from nltk import word_tokenize, pos_tag
+from nltk.stem import WordNetLemmatizer
 
 
 class Text:
@@ -42,6 +43,7 @@ class Text:
             * flesch kincaid grade level score
             * smog score
             * gunning fog index score
+            * POS (if processed)
         """
         description = {
             "text_size": self.text_size,
@@ -59,7 +61,8 @@ class Text:
             "flesch_reading_ease_score": self.flesch_reading_ease_score,
             "flesch_kincaid_grade_level_score": self.flesch_kincaid_grade_level_score,
             "smog_score": self.smog_score,
-            "gunning_fog_index_score": self.gunning_fog_index_score
+            "gunning_fog_index_score": self.gunning_fog_index_score,
+            "part_of_speech_tagging": self.pos if "pos" in self else None
         }
 
         if verbose:
@@ -72,6 +75,7 @@ class Text:
         self.stopwords_set.add('.')
 
     def __extract_features(self):
+        self.text = self.text.lower()
         self.text_size = len(self.text)
         self.words = self.text.split(' ')
         self.total_words = len(self.words)
@@ -173,10 +177,38 @@ class Text:
     def named_entity_recognition(self):
         pass
 
-    def speech_tagging(self):
+    def speech_tagging(self, embedded=False):
+        """
+            Performs a POS tagging on the text
+        """
         tokens = word_tokenize(self.text)
         self.pos = pos_tag(tokens)
+
+        embedded_pos = []
+        if embedded:
+            for word, tag in self.pos:
+                embedded_word = word + "_" + tag
+                embedded_pos.append(embedded_word)
+
+            return embedded_pos
+
         return self.pos
+
+    def noise_remoaval(self):
+        pass
+
+    def normalization(self):
+        """
+            Normalizes a text using series of techniques
+            Noise removal, stop words remoaval, word tokenization, lemmatization
+        """
+        cleaned_text = ""
+        lemmatizer = WordNetLemmatizer()
+        for word in self.stopwords_text:
+            cleaned_text = cleaned_text + " " + lemmatizer.lemmatize(word)
+
+        self.normalizad_text = cleaned_text[1:]
+        return self.normalizad_text
 
     def topics_modeling(self):
         pass
