@@ -83,7 +83,7 @@ class Text:
         self.stopwords_set = set(stopwords.words('english'))
         self.stopwords_set.add('.')
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def __extract_features(self):
         self.text = self.text.lower()
         self.text_size = len(self.text)
@@ -159,7 +159,7 @@ class Text:
     def lexical_tree(self):
         pass
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def summarize(self, top_n=3, verbose=True):
         """
           Extracts a n chunk summary from the main text.
@@ -202,7 +202,7 @@ class Text:
     def named_entity_recognition(self):
         pass
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def speech_tagging(self, embedded=False):
         """
             Performs a POS tagging on the text
@@ -260,7 +260,7 @@ class Text:
         self.stemmed_text = ' '.join([stemmer.stem(word) for word in self.text.split()])
         return self.stemmed_text
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def normalization(self):
         """
             Normalizes a text using series of techniques
@@ -278,7 +278,7 @@ class Text:
     def topics_modeling(self):
         pass
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def ngrams_extraction(self, n):
         """
             Perform a ngrams extraction on the text.
@@ -290,7 +290,7 @@ class Text:
 
         return out
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def bigrams_extraction(self):
         """
             Perform a bigrams extraction on the text.
