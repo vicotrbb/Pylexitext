@@ -7,6 +7,10 @@ import numpy as np
 # from spellchecker import SpellChecker
 from nltk import word_tokenize, pos_tag
 from nltk.stem import WordNetLemmatizer
+import nltk
+import re
+import string
+from functools import lru_cache
 
 
 class Text:
@@ -14,7 +18,7 @@ class Text:
     def __init__(self, text, language='english'):
         if type(text) is not str:
             raise TypeError("Entry must be an String")
-        
+
         self.raw_text = text
         self.text = text
         self.language = language
@@ -26,6 +30,7 @@ class Text:
     def __repr__(self) -> str:
         return self.describe()
 
+    @lru_cache(maxsize=128)
     def describe(self, verbose=False):
         """
             Describes all the text features:
@@ -35,6 +40,7 @@ class Text:
             * List of words wout/ stopwords
             * Number of words wout/ stopwords
             * Number of present stopwords
+            * Unique words
             * Number of unique words
             * Number of sentences
             * Lexical diversity (%)
@@ -52,6 +58,7 @@ class Text:
             "non_stop_words": self.stopwords_text,
             "stop_words": self.is_stopwords_text,
             "stop_words_number": self.number_stopwords,
+            "unique_terms": self.unique_terms,
             "unique_words": self.text_uniques_number,
             "sentences": self.text_sentences,
             "number_senteces": self.text_sentences_number,
@@ -71,10 +78,12 @@ class Text:
 
         return description
 
+    @lru_cache(maxsize=128)
     def __generate_stop_words(self):
         self.stopwords_set = set(stopwords.words('english'))
         self.stopwords_set.add('.')
 
+    @lru_cache(maxsize=128)
     def __extract_features(self):
         self.text = self.text.lower()
         self.text_size = len(self.text)
@@ -84,7 +93,8 @@ class Text:
             ' ') if word not in self.stopwords_set]
         self.is_stopwords_text = [word for word in self.text.split(
             ' ') if word in self.stopwords_set]
-        self.text_uniques_number = len(set(self.stopwords_text))
+        self.unique_terms = set(self.stopwords_text)
+        self.text_uniques_number = len(self.unique_terms)
         self.text_sentences = self.text.split('.')
         self.text_sentences_number = len(self.text_sentences)
         self.number_stopwords = len(set(self.is_stopwords_text))
@@ -105,6 +115,14 @@ class Text:
         self.smog_score = self.smog()
         self.gunning_fog_index_score = self.gunning_fog_index()
 
+    @lru_cache(maxsize=128)
+    def topics_extraction(self):
+        """
+            This methods can discover the topics of a text.
+        """
+        pass
+
+    @lru_cache(maxsize=128)
     def split_by(self, bias):
         text_chunks = []
 
@@ -121,6 +139,7 @@ class Text:
     #     misspelled = spell.unknown(self.stopwords_text)
     #     return misspelled
 
+    @lru_cache(maxsize=128)
     def word_cloud(self):
         """
           Plots a word frequency cloud.
@@ -128,6 +147,7 @@ class Text:
         plt.word_cloud(self.stop_words, self.text)
         pass
 
+    @lru_cache(maxsize=128)
     def word_frequency_plot(self):
         """
           Plots a word frequency line plot.
@@ -135,9 +155,11 @@ class Text:
         plt.word_frequency_plot(self.fdist)
         pass
 
+    @lru_cache(maxsize=128)
     def lexical_tree(self):
         pass
 
+    @lru_cache(maxsize=128)
     def summarize(self, top_n=3, verbose=True):
         """
           Extracts a n chunk summary from the main text.
@@ -166,6 +188,7 @@ class Text:
 
         return self.summary
 
+    @lru_cache(maxsize=128)
     def sentiment_analysis(self, verbose=False, method='vader'):
         if method == 'vader':
             from . import sentiment
@@ -175,9 +198,11 @@ class Text:
         else:
             pass
 
+    @lru_cache(maxsize=128)
     def named_entity_recognition(self):
         pass
 
+    @lru_cache(maxsize=128)
     def speech_tagging(self, embedded=False):
         """
             Performs a POS tagging on the text
@@ -195,9 +220,47 @@ class Text:
 
         return self.pos
 
+    @lru_cache(maxsize=128)
+    def remove_numbers(self):
+        """
+           Remove numbers from the text
+        """
+        pattern = r'[^a-zA-z.,!?/:;\"\'\s]'
+        return re.sub(pattern, '', self.text)
+
+    def remove_punctuation(self):
+        """
+           Remove ponctuation from the text
+        """
+        output = ''.join([c for c in self.text if c not in string.punctuation])
+        return output
+
+    @lru_cache(maxsize=128)
+    def remove_extra_whitespace_tabs(text):
+        """
+           Remove extra white spaces and tabs from the text
+        """
+        pattern = r'^\s*|\s\s*'
+        return re.sub(pattern, ' ', text).strip()
+
+    @lru_cache(maxsize=128)
     def noise_remoaval(self):
+        """
+            Remove all the noise from the text, including:
+                * Numbers
+                * stopwords
+                * special characters
+                * non unicode
+        """
         pass
 
+    @lru_cache(maxsize=128)
+    def stemming(self):
+        stemmer = nltk.porter.PorterStemmer()
+        self.stemmed_text = ' '.join([stemmer.stem(word) for word in self.text.split()])
+        return self.stemmed_text
+
+    @lru_cache(maxsize=128)
     def normalization(self):
         """
             Normalizes a text using series of techniques
@@ -211,27 +274,66 @@ class Text:
         self.normalizad_text = cleaned_text[1:]
         return self.normalizad_text
 
+    @lru_cache(maxsize=128)
     def topics_modeling(self):
         pass
 
-    def __ngrams(self):
-        pass
+    @lru_cache(maxsize=128)
+    def ngrams_extraction(self, n):
+        """
+            Perform a ngrams extraction on the text.
+            ngrams = chunks of 'n' words from the text splited in lists
+        """
+        out = []
+        for i in range(len(self.words)-n+1):
+            out.append(self.words[i:i+n])
+
+        return out
+
+    @lru_cache(maxsize=128)
+    def bigrams_extraction(self):
+        """
+            Perform a bigrams extraction on the text.
+            bigrams = chunks of 2 words from the text splited in lists
+        """
+        self.bigrams = self.ngrams(n=2)
+        return self.bigrams
 
     # -----------------------------------------
-    # Readibility of the text
+    # Readibility of the text: English
     # -----------------------------------------
+
+    @lru_cache(maxsize=128)
     def flesch_reading_ease(self):
         return 206.835 - (1.015*(self.total_words/self.text_sentences_number)) - (84.7*(self.total_syllables/self.total_words))
 
+    @lru_cache(maxsize=128)
     def flesch_kincaid_grade_level(self):
         return (0.39*(self.total_words/self.text_sentences_number)) + (11.8*(self.total_syllables/self.total_words)) - 15.59
 
+    @lru_cache(maxsize=128)
     def smog(self):
         return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
 
+    @lru_cache(maxsize=128)
     def gunning_fog_index(self):
         return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
 
     # -----------------------------------------
     # Statistics methods
     # -----------------------------------------
+
+    @lru_cache(maxsize=128)
+    def term_frequency(self):
+        """
+            Performs an unique words frequency(%) count on the text. 
+        """
+        terms = []
+        for term in self.unique_terms:
+            result = {
+                term: (self.words.count(term) / self.text_size) * 100
+            }
+            terms.append(result)
+
+        self.terms_frequency = terms
+        return self.terms_frequency
