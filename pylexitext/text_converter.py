@@ -35,15 +35,16 @@ def convert_sound_to_text(sound_file) -> text.Text:
         with sr.AudioFile(chunk_filename) as source:
             audio_listened = r.record(source)
             try:
-                text = r.recognize_google(audio_listened)
+                text_chunks = r.recognize_google(audio_listened)
             except sr.UnknownValueError as e:
                 print("Error:", str(e))
             else:
-                text = f"{text.capitalize()}. "
-                print(chunk_filename, ":", text)
-                converted_text += text
+                text_chunks = f"{text_chunks.capitalize()}. "
+                print(chunk_filename, ":", text_chunks)
+                converted_text += text_chunks
 
     shutil.rmtree(folder_name, ignore_errors=True)
+    os.remove(sound_file)
     return text.Text(converted_text)
 
 
@@ -52,26 +53,34 @@ def from_video_to_text(video_path, source='youtube') -> text.Text:
     Converts the audio of a video to text
     """
 
-    if source == 'youtube':
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }]
-        }
+    try:
+        if source == 'youtube':
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }]
+            }
 
-        output_file_name = None
-        with yt.YoutubeDL(ydl_opts) as ydl:
-            extracted_info = ydl.extract_info(url=video_path, download=False)
-            output_file_name = ydl.prepare_filename(extracted_info)
-            ydl.download([video_path])
+            output_file_name = None
+            with yt.YoutubeDL(ydl_opts) as ydl:
+                extracted_info = ydl.extract_info(url=video_path, download=False)
+                output_file_name = ydl.prepare_filename(extracted_info)
+                ydl.download([video_path])
 
-        return convert_sound_to_text(output_file_name)
+            output_file_name = output_file_name.split('.', 1)[0] + ".mp3"
 
-    elif source == 'file':
-        return
+            return convert_sound_to_text(output_file_name)
+
+        elif source == 'file':
+            return
+    except:
+        print('This functionality needs a ffmpeg decoder, please install it.')
+        print('Ubuntu/debian -> sudo apt-get install ffmpeg')
+        print('MacOS -> brew install ffmpeg')
+        print('Windows using chocolatey -> choco install ffmpeg')
 
 
 def from_podcast_to_text(url, source='spotify') -> text.Text:

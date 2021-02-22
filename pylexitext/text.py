@@ -15,7 +15,7 @@ from functools import lru_cache
 
 class Text:
 
-    def __init__(self, text, language='english'):
+    def __init__(self, text, language='english', pre_process=True):
         if type(text) is not str:
             raise TypeError("Entry must be an String")
 
@@ -24,8 +24,9 @@ class Text:
         self.language = language
 
         # Kickstart methods
-        self.__generate_stop_words()
-        self.__extract_features()
+        if pre_process:
+            self.__generate_stop_words()
+            self.__extract_features()
 
     def __repr__(self) -> str:
         return self.describe()
@@ -46,10 +47,10 @@ class Text:
             * Lexical diversity (%)
             * Total syllables
             * Total polysyllables
-            * flesch reading ease score
-            * flesch kincaid grade level score
-            * smog score
-            * gunning fog index score
+            * Flesch reading ease score
+            * Flesch kincaid grade level score
+            * Smog score
+            * Gunning fog index score
             * POS (if processed)
         """
         description = {
@@ -191,7 +192,7 @@ class Text:
     @lru_cache(maxsize=128)
     def sentiment_analysis(self, verbose=False, method='vader'):
         if method == 'vader':
-            from . import sentiment
+            from .sentiment import sentiment
 
             return sentiment.vader_sentiment_analysis(self.text, verbose)
 
