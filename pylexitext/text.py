@@ -265,7 +265,7 @@ class Text:
     def avg_sentence_length(self):
         return round(float(self.total_words / self.total_sentences))
 
-    @lru_cache(maxsize=128)
+    @staticmethod
     def remove_extra_whitespace_tabs(text):
         """
            Remove extra white spaces and tabs from the text
