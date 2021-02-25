@@ -16,6 +16,11 @@ from functools import lru_cache
 class Text:
 
     def __init__(self, text, language='english', pre_process=True):
+        self.__accepted_languages = ['english']
+
+        if language not in self.__accepted_languages:
+            raise TypeError("language not supported")
+
         if type(text) is not str:
             raise TypeError("Entry must be an String")
 
@@ -28,8 +33,15 @@ class Text:
             self.__generate_stop_words()
             self.__extract_features()
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return self.describe()
+
+    def set_lang(self, language='english'):
+        self.language = language
+
+        if self.language != language:
+            self.__generate_stop_words()
+            self.__extract_features()
 
     @lru_cache(maxsize=128)
     def describe(self, verbose=False):
@@ -38,6 +50,7 @@ class Text:
             * Text size
             * Number of words
             * List of stopwords
+            * Characteres count
             * List of words wout/ stopwords
             * Number of words wout/ stopwords
             * Number of present stopwords
@@ -56,6 +69,7 @@ class Text:
         description = {
             "text_size": self.text_size,
             "total_words": self.total_words,
+            "char_count": self.char_count,
             "non_stop_words": self.stopwords_text,
             "stop_words": self.is_stopwords_text,
             "stop_words_number": self.number_stopwords,
@@ -71,7 +85,6 @@ class Text:
             "flesch_kincaid_grade_level_score": self.flesch_kincaid_grade_level_score,
             "smog_score": self.smog_score,
             "gunning_fog_index_score": self.gunning_fog_index_score,
-            "part_of_speech_tagging": self.pos if "pos" in self else None
         }
 
         if verbose:
@@ -81,15 +94,18 @@ class Text:
 
     @lru_cache(maxsize=128)
     def __generate_stop_words(self):
-        self.stopwords_set = set(stopwords.words('english'))
+        self.stopwords_set = set(stopwords.words(self.language))
         self.stopwords_set.add('.')
 
     @lru_cache(maxsize=256)
     def __extract_features(self):
         self.text = self.text.lower()
+        self.sentences = re.split(r' *[\.\?!][\'"\)\]]*[ |\n](?=[A-z])', self.text)
+        self.total_sentences = self.senteces_count()
         self.text_size = len(self.text)
-        self.words = self.text.split(' ')
+        self.words = self.remove_punctuation(self.text).split(' ')
         self.total_words = len(self.words)
+        self.char_count = len(self.text.replace(" ", ""))
         self.stopwords_text = [word for word in self.text.split(
             ' ') if word not in self.stopwords_set]
         self.is_stopwords_text = [word for word in self.text.split(
@@ -104,12 +120,14 @@ class Text:
         self.fdist = FreqDist(self.stopwords_text)
         self.total_syllables = 0
         self.total_polysyllables = 0
+        self.total_complex_words = 0
         for y in self.words:
             syllable_count_temp = bean.syllable_count(y)
             self.total_syllables += syllable_count_temp
 
             if syllable_count_temp >= 3:
                 self.total_polysyllables += 1
+                self.total_complex_words += 1
 
         self.flesch_reading_ease_score = self.flesch_reading_ease()
         self.flesch_kincaid_grade_level_score = self.flesch_kincaid_grade_level()
@@ -123,8 +141,8 @@ class Text:
         """
         pass
 
-    @lru_cache(maxsize=128)
-    def split_by(self, bias):
+    @staticmethod
+    def split_by(text=''):
         text_chunks = []
 
         # TO-DO
@@ -199,9 +217,16 @@ class Text:
         else:
             pass
 
-    @lru_cache(maxsize=128)
     def named_entity_recognition(self):
         pass
+
+    @lru_cache(maxsize=128)
+    def senteces_count(self):
+        self.total_sentences = 0
+        for sentece in self.sentences:
+            if len(self.remove_punctuation(text=sentece).split(' ')) > 2:
+                self.total_sentences += 1
+        return max(1, self.total_sentences)
 
     @lru_cache(maxsize=256)
     def speech_tagging(self, embedded=False):
@@ -221,20 +246,24 @@ class Text:
 
         return self.pos
 
-    @lru_cache(maxsize=128)
-    def remove_numbers(self):
+    @staticmethod
+    def remove_numbers(text=''):
         """
            Remove numbers from the text
         """
         pattern = r'[^a-zA-z.,!?/:;\"\'\s]'
-        return re.sub(pattern, '', self.text)
+        return re.sub(pattern, '', text)
 
-    def remove_punctuation(self):
+    @staticmethod
+    def remove_punctuation(text=''):
         """
            Remove ponctuation from the text
         """
-        output = ''.join([c for c in self.text if c not in string.punctuation])
+        output = ''.join([c for c in text if c not in string.punctuation])
         return output
+
+    def avg_sentence_length(self):
+        return round(float(self.total_words / self.total_sentences))
 
     @lru_cache(maxsize=128)
     def remove_extra_whitespace_tabs(text):
@@ -318,7 +347,8 @@ class Text:
 
     @lru_cache(maxsize=128)
     def gunning_fog_index(self):
-        return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
+        print('gunning_fog_index: under work...')
+        return (0.4*(self.total_words/self.total_sentences) + 100*(self.total_complex_words/self.total_words))
 
     # -----------------------------------------
     # Statistics methods
