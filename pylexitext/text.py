@@ -64,7 +64,6 @@ class Text:
             * Flesch kincaid grade level score
             * Smog score
             * Gunning fog index score
-            * POS (if processed)
         """
         description = {
             "text_size": self.text_size,
@@ -158,13 +157,13 @@ class Text:
     #     misspelled = spell.unknown(self.stopwords_text)
     #     return misspelled
 
-    @lru_cache(maxsize=128)
-    def word_cloud(self):
-        """
-          Plots a word frequency cloud.
-        """
-        plt.word_cloud(self.stop_words, self.text)
-        pass
+    # @lru_cache(maxsize=128)
+    # def word_cloud(self):
+    #     """
+    #       Plots a word frequency cloud.
+    #     """
+    #     plt.word_cloud(self.stop_words, self.text)
+    #     pass
 
     @lru_cache(maxsize=128)
     def word_frequency_plot(self):

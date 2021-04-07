@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name='pylexitext',
     packages=find_packages(include=['pylexitext']),
-    version='0.1-alfa',
+    version='0.2.0',
     description='Pylexitext is a python library that aggregates a series of NLP methods, text analysis, content converters and other usefull stuff.',
     author='Victor Bona',
     license='MIT',
@@ -11,11 +11,11 @@ setup(
     keywords=['NLP', 'readability', 'nltk', 'text'],
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
-    install_requires=['numpy', 'networkx', 'matplotlib', 'wordcloud'],
-    setup_requires=[''],
+    install_requires=['numpy', 'nltk', 'networkx', 'matplotlib'],
+    setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests',
-    python_requires=">=3.6",
+    python_requires=">=3.5",
     classifiers=(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
