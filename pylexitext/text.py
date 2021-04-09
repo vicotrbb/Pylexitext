@@ -178,7 +178,7 @@ class Text:
         pass
 
     @lru_cache(maxsize=256)
-    def summarize(self, top_n=3, verbose=True):
+    def summarize(self, top_n=3, verbose=False):
         """
           Extracts a n chunk summary from the main text.
           Default n chunks = 3
@@ -308,7 +308,7 @@ class Text:
         pass
 
     @lru_cache(maxsize=256)
-    def ngrams_extraction(self, n):
+    def ngrams_extraction(self, n=3):
         """
             Perform a ngrams extraction on the text.
             ngrams = chunks of 'n' words from the text splited in lists
@@ -325,7 +325,7 @@ class Text:
             Perform a bigrams extraction on the text.
             bigrams = chunks of 2 words from the text splited in lists
         """
-        self.bigrams = self.ngrams(n=2)
+        self.bigrams = self.ngrams_extraction(n=2)
         return self.bigrams
 
     # -----------------------------------------
@@ -346,7 +346,9 @@ class Text:
 
     @lru_cache(maxsize=128)
     def gunning_fog_index(self):
-        print('gunning_fog_index: under work...')
+        """
+            Under work
+        """
         return (0.4*(self.total_words/self.total_sentences) + 100*(self.total_complex_words/self.total_words))
 
     # -----------------------------------------
