@@ -30,7 +30,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3 :: Only",
         "Intended Audience :: Developers",
-        "Intended Audience :: Data Scientists",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
         "Topic :: Text Processing",
