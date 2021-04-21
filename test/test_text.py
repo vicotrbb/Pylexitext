@@ -104,3 +104,8 @@ def test_test_senteces(text):
 
 def test_test_avg_sentence_length(text):
     assert text.avg_sentence_length() == 32
+
+
+def test_text_stemming():
+    sample = Text("I'm coding it to be the best application.")
+    assert "i'm code it to be the best application." == sample.stemming()

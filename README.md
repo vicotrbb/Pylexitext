@@ -105,9 +105,61 @@ output:
 [['best', 'hello', 'world'], ['hello', 'world', 'ever'], ['world', 'ever', 'made'], ['ever', 'made', 'by'], ['made', 'by', 'a'], ['by', 'a', 'developer']]
 ```
 
+## Text stemming
+
+Text stemming is a normalization method to return inflacted words to it's  morphological original form. 
+
+Ex: fishing, fished, and fisher -> fish
+
+```
+from pylexitext import text
+
+sample = text.Text("I'm coding it to be the best application.")
+sample.stemming()
+```
+
+output:
+
+```
+i'm code it to be the best application.
+```
+
+## Text Normalization
+
+Text normalization is a series of techniques used to "clean" the text to it's most base level, trying to reduce the randomness os the text. Usually, this type of method is used to pre-process text before use on NLP/ML models. 
+
+```
+from pylexitext import text
+
+sample = text.Text("I'm coding it to be the best application.")
+sample.normalization()
+```
+
+output:
+
+```
+i'm code best application.
+```
+
 ## Static methods
 
-...
+Pylexitext has some usefull static methods for text processment and normalization, that can be used without define a main Text object.
+
+Those methods are:
+
+```
+from pylexitext.text import remove_numbers, remove_punctuation, remove_extra_whitespace_tabs 
+
+remove_numbers('Hi1 I'm    Victor')
+# Hi I'm    Victor
+
+remove_punctuation('Hi I'm    Victor')
+# Hi Im    Victor
+
+remove_numbers('Hi Im    Victor')
+# Hi Im Victor
+
+```
 
 ## About Creator
 

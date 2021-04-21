@@ -18,9 +18,8 @@ setup(
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     install_requires=['numpy', 'nltk', 'networkx', 'matplotlib'],
-    setup_requires=['wheel', 'pytest-runner'],
+    setup_requires=['wheel', 'pytest-runner', 'flake8'],
     tests_require=['pytest'],
-    test_suite='tests',
     python_requires=">=3.5",
     classifiers=(
         "Programming Language :: Python",

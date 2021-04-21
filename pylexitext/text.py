@@ -293,14 +293,18 @@ class Text:
     def normalization(self):
         """
             Normalizes a text using series of techniques
-            Noise removal, stop words remoaval, word tokenization, lemmatization
+            Noise removal, stop words remoaval, stemming, word tokenization, lemmatization
         """
         cleaned_text = ""
         lemmatizer = WordNetLemmatizer()
         for word in self.stopwords_text:
             cleaned_text = cleaned_text + " " + lemmatizer.lemmatize(word)
 
-        self.normalizad_text = cleaned_text[1:]
+        normalizad_text = cleaned_text[1:]
+
+        stemmer = nltk.porter.PorterStemmer()
+        self.normalizad_text = ' '.join([stemmer.stem(word) for word in normalizad_text.split()])
+
         return self.normalizad_text
 
     @lru_cache(maxsize=128)
