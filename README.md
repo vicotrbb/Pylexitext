@@ -10,6 +10,12 @@ Pylexitext is a python library that aggregates a series of NLP methods, text ana
 
 ## How to use
 
+First you need to install the library using pip.
+
+```
+pip install pylexitext
+```
+
 Pylexitext uses a main object called `text` that wrapps all the text functions and some helpers to perform aditional functions.
 A basic functionality would looks like this:
 
@@ -107,7 +113,7 @@ output:
 
 ## Text stemming
 
-Text stemming is a normalization method to return inflacted words to it's  morphological original form. 
+Text stemming is a normalization method to return inflacted words to it's morphological original form.
 
 Ex: fishing, fished, and fisher -> fish
 
@@ -124,9 +130,33 @@ output:
 i'm code it to be the best application.
 ```
 
+## Text Lexical Graph generation & plotting
+
+Pylexitext can generate a lexical graph from the cleaned raw text at the Text object, this graph represents all the possible connections between words, being unique words as vertex and the connections as edges.
+
+```
+from pylexitext import text
+
+sample = text.Text("I'm coding it to be the best application.")
+sample.lexical_graph()
+
+# {'im': ['coding'], 'coding': ['it'], 'it': ['to'], 'to': ['be'], 'be': ['the'] , 'the': ['best'], 'best': ['application'], 'application': []}
+```
+
+As a visualization resource, you can easily plot the generated graph using the **lexical_graph_plot** method, that creates a pyploy graph for you.
+
+```
+from pylexitext import text
+
+sample = text.Text("I'm coding it to be the best application.")
+sample.lexical_graph_plot()
+```
+
+This method can be used as static from the **pylexitext.plots** as well.
+
 ## Text Normalization
 
-Text normalization is a series of techniques used to "clean" the text to it's most base level, trying to reduce the randomness os the text. Usually, this type of method is used to pre-process text before use on NLP/ML models. 
+Text normalization is a series of techniques used to "clean" the text to it's most base level, trying to reduce the randomness os the text. Usually, this type of method is used to pre-process text before use on NLP/ML models.
 
 ```
 from pylexitext import text
@@ -148,17 +178,37 @@ Pylexitext has some usefull static methods for text processment and normalizatio
 Those methods are:
 
 ```
-from pylexitext.text import remove_numbers, remove_punctuation, remove_extra_whitespace_tabs 
+from pylexitext.text import remove_numbers, remove_punctuation, remove_extra_whitespace_tabs, remove_non_unicode, noise_remoaval
 
-remove_numbers('Hi1 I'm    Victor')
-# Hi I'm    Victor
+remove_numbers('Hi1 I'm    Victor Ceñía')
+# Hi I'm    Victor Ceñía
 
-remove_punctuation('Hi I'm    Victor')
-# Hi Im    Victor
+remove_punctuation('Hi I'm    Victor Ceñía')
+# Hi Im    Victor Ceñía
 
-remove_numbers('Hi Im    Victor')
-# Hi Im Victor
+remove_numbers('Hi Im    Victor Ceñía')
+# Hi Im Victor Ceñía
 
+remove_non_unicode('Ceñía')
+# Hi Im Victor Cea
+
+noise_removal('Hi1 I'm    Victor Ceñía')
+# hi Im victor cea
+```
+
+### Sentence similarity
+
+Sentence similarity static method uses levenshtein distance method to compoare and calculate the similarity of two sentences.
+
+```
+from pylexitext.text import sentence_similarity
+
+sentence_similarity('hello beautiful world', 'hello world')
+# 0.8598892366800223
+
+# You can get the output in 0-100% as well:
+sentence_similarity('hello beautiful world', 'hello world', percentage_base=True)
+# 85.99
 ```
 
 ## About Creator

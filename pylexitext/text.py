@@ -15,6 +15,10 @@ from functools import lru_cache
 
 class Text:
 
+    """
+
+    """
+
     def __init__(self, text, language='english', pre_process=True):
         self.__accepted_languages = ['english']
 
@@ -28,7 +32,7 @@ class Text:
         self.text = text
         self.language = language
 
-        # Kickstart methods
+        # Startup methods
         if pre_process:
             self.__generate_stop_words()
             self.__extract_features()
@@ -102,7 +106,7 @@ class Text:
         self.sentences = re.split(r' *[\.\?!][\'"\)\]]*[ |\n](?=[A-z])', self.text)
         self.total_sentences = self.senteces_count()
         self.text_size = len(self.text)
-        self.words = self.remove_punctuation(self.text).split(' ')
+        self.words = Text.noise_removal(self.text).split(' ')
         self.total_words = len(self.words)
         self.char_count = len(self.text.replace(" ", ""))
         self.stopwords_text = [word for word in self.text.split(
@@ -136,17 +140,9 @@ class Text:
     @lru_cache(maxsize=128)
     def topics_extraction(self):
         """
-            This methods can discover the topics of a text.
+            TO-BE-DONE
         """
         pass
-
-    @staticmethod
-    def split_by(text=''):
-        text_chunks = []
-
-        # TO-DO
-
-        return text_chunks
 
     # def misspeled(self):
     #     """
@@ -174,8 +170,41 @@ class Text:
         pass
 
     @lru_cache(maxsize=128)
-    def lexical_tree(self):
+    def lexical_tree(self, size=(30, 24), **kwargs):
+        """
+            TO-BE-DONE
+        """
         pass
+
+    @lru_cache(maxsize=128)
+    def lexical_graph(self):
+        """
+          Generates a lexical graph from the original clened text, this lexical graph is represented by all the unique terms from the cleaned text(including stopwords)
+          as the Vertex and the edges are the possible connections between words from the text.
+        """
+        lexical_graph = {}
+
+        for sentence in self.sentences:
+            text_nodes = Text.noise_removal(sentence).split(' ')
+
+            for index, word in enumerate(text_nodes):
+                if word not in lexical_graph:
+                    lexical_graph[word] = []
+
+                if index + 1 < len(text_nodes):
+                    if text_nodes[index + 1] not in lexical_graph[word]:
+                        lexical_graph[word].append(text_nodes[index + 1])
+
+        return lexical_graph
+
+    def lexical_graph_plot(self, size=(30, 24), dpi=80, **kwargs):
+        """
+            Plots a graph from the lexical graph method.
+
+            This method can be used for any other graph as well, find it on pylexitext.plots.
+        """
+        graph = self.lexical_graph()
+        plt.lexical_graph(graph, size, dpi, kwargs)
 
     @lru_cache(maxsize=256)
     def summarize(self, top_n=3, verbose=False):
@@ -223,7 +252,7 @@ class Text:
     def senteces_count(self):
         self.total_sentences = 0
         for sentece in self.sentences:
-            if len(self.remove_punctuation(text=sentece).split(' ')) > 2:
+            if len(Text.remove_punctuation(text=sentece).split(' ')) > 2:
                 self.total_sentences += 1
         return max(1, self.total_sentences)
 
@@ -245,46 +274,12 @@ class Text:
 
         return self.pos
 
-    @staticmethod
-    def remove_numbers(text=''):
-        """
-           Remove numbers from the text
-        """
-        pattern = r'[^a-zA-z.,!?/:;\"\'\s]'
-        return re.sub(pattern, '', text)
-
-    @staticmethod
-    def remove_punctuation(text=''):
-        """
-           Remove ponctuation from the text
-        """
-        output = ''.join([c for c in text if c not in string.punctuation])
-        return output
-
-    def avg_sentence_length(self):
-        return round(float(self.total_words / self.total_sentences))
-
-    @staticmethod
-    def remove_extra_whitespace_tabs(text):
-        """
-           Remove extra white spaces and tabs from the text
-        """
-        pattern = r'^\s*|\s\s*'
-        return re.sub(pattern, ' ', text).strip()
-
-    @lru_cache(maxsize=128)
-    def noise_remoaval(self):
-        """
-            Remove all the noise from the text, including:
-                * Numbers
-                * stopwords
-                * special characters
-                * non unicode
-        """
-        pass
-
     @lru_cache(maxsize=128)
     def stemming(self):
+        """
+            Normalization method to return inflacted words to it's morphological original form.
+            Ex: fishing, fished, and fisher -> fish
+        """
         stemmer = nltk.porter.PorterStemmer()
         self.stemmed_text = ' '.join([stemmer.stem(word) for word in self.text.split()])
         return self.stemmed_text
@@ -309,6 +304,9 @@ class Text:
 
     @lru_cache(maxsize=128)
     def topics_modeling(self):
+        """
+            TO-BE-DONE
+        """
         pass
 
     @lru_cache(maxsize=256)
@@ -331,6 +329,37 @@ class Text:
         """
         self.bigrams = self.ngrams_extraction(n=2)
         return self.bigrams
+
+    def avg_sentence_length(self):
+        """
+            Calculates the avarage sentence length from the text.
+        """
+        return round(float(self.total_words / self.total_sentences))
+
+    @lru_cache(maxsize=128)
+    def term_frequency(self):
+        """
+            Performs an unique words frequency(%) count on the text. 
+        """
+        terms = []
+        for term in self.unique_terms:
+            result = {
+                term: (self.words.count(term) / self.text_size) * 100
+            }
+            terms.append(result)
+
+        self.terms_frequency = terms
+        return self.terms_frequency
+
+    @lru_cache(maxsize=128)
+    def text_similarity(self, text):
+        """
+            Compares the raw text at the pylexitext Text object and the inputed text to compare, 
+            returns the similarity as 0-1.
+
+            The text similarity is calculated using the levenshtein distance method.
+        """
+        return bean.levenshtein_distance(self.raw_text, text)
 
     # -----------------------------------------
     # Readibility of the text: English
@@ -359,17 +388,68 @@ class Text:
     # Statistics methods
     # -----------------------------------------
 
-    @lru_cache(maxsize=128)
-    def term_frequency(self):
-        """
-            Performs an unique words frequency(%) count on the text. 
-        """
-        terms = []
-        for term in self.unique_terms:
-            result = {
-                term: (self.words.count(term) / self.text_size) * 100
-            }
-            terms.append(result)
+    @staticmethod
+    def split_by(text=''):
+        text_chunks = []
 
-        self.terms_frequency = terms
-        return self.terms_frequency
+        # TO-DO
+
+        return text_chunks
+
+    @staticmethod
+    def remove_numbers(text=''):
+        """
+           Remove numbers from the text
+        """
+        pattern = r'[^a-zA-z.,!?/:;\"\'\s]'
+        return re.sub(pattern, '', text)
+
+    @staticmethod
+    def remove_punctuation(text=''):
+        """
+           Remove ponctuation from the text
+        """
+        output = ''.join([c for c in text if c not in string.punctuation])
+        return output
+
+    @staticmethod
+    def remove_extra_whitespace_tabs(text):
+        """
+           Remove extra white spaces and tabs from the text
+        """
+        pattern = r'^\s*|\s\s*'
+        return re.sub(pattern, ' ', text).strip()
+
+    @staticmethod
+    def remove_non_unicode(text):
+        return ''.join([i if ord(i) < 128 else '' for i in text])
+
+    @staticmethod
+    def noise_removal(text):
+        """
+            Remove all the noise from the text, including:
+                * Numbers
+                * stopwords
+                * special characters
+                * extra whitespaces and tabs
+                * non unicode
+
+            Outputs the resultant text
+        """
+        text = Text.remove_numbers(text)
+        text = Text.remove_punctuation(text)
+        text = Text.remove_extra_whitespace_tabs(text)
+        text = Text.remove_non_unicode(text)
+        text = text.lower()
+        return text
+
+    @staticmethod
+    def sentence_similarity(sentence1, sentence2, percentage_base=False):
+        """
+           Compares two sentences and outputs the sentence similarity of them.
+           The sentences similarity is calculated using the levenshtein distance method.
+        """
+        output = bean.levenshtein_distance(sentence1, sentence2)
+        if percentage_base:
+            return round(output * 100, 2)
+        return output

@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name='pylexitext',
     packages=find_packages(include=['pylexitext']),
-    version='0.2.2',
+    version='0.2.3',
     description='Pylexitext is a python library that aggregates a series of NLP methods, text analysis, content converters and other usefull stuff.',
     author='Victor Bona',
     license='MIT',
