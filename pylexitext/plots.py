@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import networkx as nx
 # from wordcloud import WordCloud
 
 
@@ -11,6 +12,22 @@ from matplotlib import pyplot as plt
 
 def word_frequency_plot(fdist):
     fdist.plot(25, cumulative=False)
+    plt.show()
+
+
+def lexical_graph(graph, size=(30, 24), dpi=80, **kwargs):
+    if type(lexical_graph) != 'dict':
+        raise TypeError('This method demands a adjacency list graph format')
+
+    plt.figure(figsize=size, dpi=dpi)
+    edges = []
+    for i in graph.keys():
+        for v in graph[i]:
+            edges.append([i, v])
+
+    G = nx.Graph()
+    G.add_edges_from(edges)
+    nx.draw_networkx(G, kwads=kwargs)
     plt.show()
 
 

@@ -25,22 +25,21 @@ def test_health_check(text):
         assert True == True
 
 
-# def test_describe(text):
-    # features = {}
-
-    # assert text.describe() == features
-
-
-# def test_split():
-#     pass
-
-
-# def test_misspeled():
-#     pass
-
-
-# def test_lexical_tree():
-#     pass
+def test_describe(text):
+    features = text.describe()
+    assert features['text_size'] == 3017
+    assert features['total_words'] == 538
+    assert features['char_count'] == 2479
+    assert features['stop_words_number'] == 67
+    assert features['unique_words'] == 181
+    assert features['number_senteces'] == 18
+    assert features['lexical_diversity'] == 68.04511278195488
+    assert features['total_syllables'] == 780
+    assert features['total_polysyllables'] == 68
+    assert features['flesch_reading_ease_score'] == 53.69852127220159
+    assert features['flesch_kincaid_grade_level_score'] == 13.174473358116483
+    assert features['smog_score'] == 14.232682905230785
+    # assert features.gunning_fog_index_score == 25.298228733872733
 
 
 def ngrams_extraction(text):
@@ -59,24 +58,6 @@ def test_summarize(text):
     summary = """What kind of program should i write to build up my resume so why don't i like these questions because it feels like the people who are asking these questions they are learning how to program just for the sake of learning how to program. But i think it's a pay wasn't great i don't think a lot of you would spend hours and hours every night in front of the computer trying to learn how to code or to just debug your program sometimes we get caught up learning languages or doing coding challenges or fantasizing about you not working for these big tech companies that weforget why we wanted to learn programming in the first place. You don't learn how to program to get into google"""
     assert text.summarize(verbose=False) == summary
 
-
-def test_flesch_reading_ease(text):
-    assert text.flesch_reading_ease() == 53.71281746031745
-
-
-def test_flesch_kincaid_grade_level(text):
-    assert text.flesch_kincaid_grade_level() == 13.186292517006802
-
-
-def test_smog(text):
-    assert text.smog() == 14.232682905230785
-
-
-# under work.....
-# def test_gunning_fog_index(text):
-#     assert text.gunning_fog_index() == 4.232682905230785
-
-
 # def test_terms_frequency(text):
 #     terms_sample = [{'today': 0.033145508783559825}, {'causes': 0.033145508783559825}, {'x': 0.033145508783559825}, {'innovator': 0.033145508783559825}, {'write': 0.09943652635067948}, {'get': 0.1325820351342393}, {'floods': 0.033145508783559825}, {'call': 0.06629101756711965}, {'qualities': 0.033145508783559825}, {'natural': 0.06629101756711965}, {'solver': 0.033145508783559825}, {'spend': 0.033145508783559825}, {'improve': 0.033145508783559825}, {'companies': 0.033145508783559825}, {'lies': 0.033145508783559825}, {'place.': 0.0}, {'novels': 0.033145508783559825}, {'money': 0.033145508783559825}, {'big': 0.033145508783559825}, {'reduce': 0.033145508783559825}, {'trying': 0.033145508783559825}, {'anything': 0.033145508783559825}, {'competition': 0.033145508783559825}, {'meaningful': 0.033145508783559825}, {'volcanoes': 0.033145508783559825}, {'like.': 0.0}, {'code': 0.16572754391779915}, {'take.': 0.0}, {'right': 0.06629101756711965}, {'families': 0.033145508783559825}, {'questions': 0.16572754391779915}, {'portraits': 0.033145508783559825}, {'mark': 0.033145508783559825}, {'change': 0.033145508783559825}, {'the.': 0.0}, {'analytical': 0.033145508783559825}, {'build': 0.2983095790520385}, {'speak': 0.033145508783559825}, {'every': 0.06629101756711965}, {'enough.': 0.0}, {'tool': 0.06629101756711965}, {'computer': 0.033145508783559825}, {'need': 0.16572754391779915}, {'open': 0.033145508783559825}, {'special': 0.033145508783559825}, {'would': 0.033145508783559825}, {'hard': 0.033145508783559825}, {'programming': 0.2651640702684786}, {'tool.': 0.0}, {'imagination.': 0.0}, {'first': 0.033145508783559825}, {'front': 0.033145508783559825}, {'damage': 0.033145508783559825}, {'saw': 0.033145508783559825}, {'people': 0.09943652635067948}, {'turn': 0.033145508783559825}, {'machine': 0.033145508783559825}, {'impactful': 0.033145508783559825}, {'means': 0.06629101756711965}, {'series': 0.033145508783559825}, {'across': 0.033145508783559825}, {'google.': 0.0}, {'empathetic': 0.033145508783559825}, {'feels': 0.033145508783559825}, {'technologies.': 0.0}, {'press': 0.033145508783559825}, {'year': 0.033145508783559825}, {'got': 0.033145508783559825}, {'nothing': 0.033145508783559825}, {'disasters': 0.06629101756711965}, {'sake': 0.033145508783559825}, {'think': 0.1325820351342393}, {'limited': 0.033145508783559825}, {'calls': 0.033145508783559825}, {'make': 0.033145508783559825}, {'refrigerator': 0.033145508783559825}, {'exact': 0.033145508783559825}, {'affect': 0.033145508783559825}, {'skyscraper': 0.033145508783559825}, {'tech': 0.033145508783559825}, {'something': 0.2651640702684786}, {'things.': 0.0}, {'solutions': 0.033145508783559825}, {'ibm': 0.033145508783559825}, {'pay': 0.033145508783559825}, {'example': 0.033145508783559825}, {"i'm": 0.0}, {'world': 0.06629101756711965}, {'resume': 0.033145508783559825}, {'hours': 0.06629101756711965}, {'kind': 0.06629101756711965}, {
 #         'arsenal': 0.033145508783559825}, {'working': 0.033145508783559825}, {'pencil': 0.09943652635067948}, {'asking': 0.033145508783559825}, {'kinds': 0.033145508783559825}, {'ass': 0.033145508783559825}, {'lot': 0.06629101756711965}, {'positive': 0.033145508783559825}, {'challenge': 0.033145508783559825}, {'global': 0.06629101756711965}, {'steps': 0.033145508783559825}, {'problems': 0.033145508783559825}, {'amazing.': 0.0}, {'trade': 0.033145508783559825}, {'impact': 0.06629101756711965}, {'great': 0.033145508783559825}, {'built': 0.033145508783559825}, {'allows': 0.033145508783559825}, {'language': 0.033145508783559825}, {'tremendous': 0.033145508783559825}, {'actually': 0.033145508783559825}, {'things': 0.09943652635067948}, {'giving': 0.033145508783559825}, {'helps': 0.033145508783559825}, {'challenges': 0.033145508783559825}, {'initiative': 0.033145508783559825}, {'program.': 0.0}, {'certain': 0.033145508783559825}, {'become': 0.033145508783559825}, {'perform': 0.033145508783559825}, {'wildfires': 0.033145508783559825}, {'destructive': 0.033145508783559825}, {'actions': 0.033145508783559825}, {'express': 0.033145508783559825}, {'languages': 0.06629101756711965}, {'desperately': 0.033145508783559825}, {'programmer': 0.06629101756711965}, {'instructions': 0.033145508783559825}, {'matters': 0.033145508783559825}, {'problem': 0.06629101756711965}, {'talk': 0.033145508783559825}, {'amazing': 0.06629101756711965}, {'strive': 0.033145508783559825}, {'weforget': 0.033145508783559825}, {'automate': 0.033145508783559825}, {'want': 0.033145508783559825}, {'plans': 0.033145508783559825}, {'called': 0.033145508783559825}, {'door.': 0.0}, {'learning': 0.09943652635067948}, {'difference': 0.033145508783559825}, {'2018': 0.033145508783559825}, {"they're": 0.0}, {'using': 0.033145508783559825}, {'program': 0.2983095790520385}, {'light': 0.033145508783559825}, {'programming.': 0.0}, {'boring.': 0.0}, {'fantasizing': 0.033145508783559825}, {'real': 0.09943652635067948}, {'partnered': 0.033145508783559825}, {'company': 0.033145508783559825}, {'hundreds': 0.06629101756711965}, {'ask': 0.033145508783559825}, {'solves': 0.033145508783559825}, {'earthquakes': 0.033145508783559825}, {'around': 0.033145508783559825}, {"what's": 0.0}, {'beautiful': 0.033145508783559825}, {'many': 0.06629101756711965}, {'stuff': 0.033145508783559825}, {'you.': 0.0}, {'hurricanes': 0.033145508783559825}, {'developers': 0.033145508783559825}, {'like': 0.19887305270135897}, {'draw': 0.033145508783559825}, {'creator': 0.033145508783559825}, {'numerous': 0.033145508783559825}, {"that's": 0.0}, {'makes': 0.033145508783559825}, {'know': 0.033145508783559825}, {'debug': 0.033145508783559825}, {'sometimes': 0.033145508783559825}, {'night': 0.033145508783559825}, {'caught': 0.033145508783559825}, {'wanted': 0.06629101756711965}, {'coding': 0.033145508783559825}, {'learn': 0.23201856148491878}, {'b': 0.033145508783559825}, {'it.': 0.0}]
@@ -93,19 +74,34 @@ def test_remove_numbers():
     assert len(Text.remove_numbers(text=text_w_numbers)) == 5
 
 
+def test_remove_non_unicode():
+    text_w_non_unicoode = "Ceñía"
+    assert Text.noise_removal(text=text_w_non_unicoode) == 'Cea'
+
+
 def test_sentiment_vader_test(text):
     assert text.sentiment_analysis(method='vader') == {'neg': 0.099, 'neu': 0.776, 'pos': 0.125, 'compound': 0.9217}
 
 
-def test_test_senteces(text):
-    assert len(text.sentences) == 17
-    assert text.total_sentences == 17
+def test_remove_non_unicode():
+    sample = Text.remove_non_unicode('Ceñía')
+    assert sample == 'Cea'
 
 
-def test_test_avg_sentence_length(text):
-    assert text.avg_sentence_length() == 32
+def test_noise_removal():
+    sample = Text.noise_removal("Hi1 I'm    Victor Ceñía")
+    assert sample == 'hi im victor cea'
+
+
+def test_normalization(text):
+    assert text.normalization() == "got lot question program think they'r right question ask question like. mani languag need learn languag need learn get compani x what' differ b make money exact step need take. becom the. kind program write build resum like question feel like peopl ask question learn program sake learn program. program tool. programm mean write code autom things. make thing perform certain action exampl program refriger turn light open door. think it. program actual kind boring. give seri instruct machin get right want speak you. think pay great think lot would spend hour hour everi night front comput tri learn code debug program sometim get caught learn languag code challeng fantas work big tech compani weforget want learn program first place. want program saw amaz thing built use programming. learn program build someth matter build someth mean someth build someth solv problem problem solver creator innov programm program tool arsen build someth amazing. analyt trade empathet program allow express qualiti program noth special like pencil mark stuff press pencil hard enough. that' pencil write novel draw beauti portrait build plan skyscrap anyth limit imagination. learn program get google. learn program build someth meaning someth help real peopl real problem i'm partner ibm today talk global initi call call code call develop build someth impact posit chang across world code know hundr hundr natur disast everi year like hurrican earthquak flood volcano wildfir affect numer lie caus tremend damag mani famili around world strive real impact desper need 2018 call code global challeng competit as peopl like build solut improv reduc destruct impact natur disast need kind technologies."
 
 
 def test_text_stemming():
     sample = Text("I'm coding it to be the best application.")
     assert "i'm code it to be the best application." == sample.stemming()
+
+
+def test_sentence_similarity():
+    sample = Text.sentence_similarity('hello beautiful world', 'hello world')
+    assert sample == 0.8598892366800223
