@@ -11,6 +11,7 @@ import nltk
 import re
 import string
 from functools import lru_cache
+from random import randint
 
 
 class Text:
@@ -207,6 +208,40 @@ class Text:
         plt.lexical_graph(graph, size, dpi, kwargs)
 
     @lru_cache(maxsize=256)
+    def rearrange_text(self):
+        """
+            Rearrange the text to a new format, keeping the meaning and the lexical format.
+            UNDER WORK
+        """
+        text_lexical_graph = self.lexical_graph()
+
+        possible_roots = re.findall(r'[A-Z][a-zA-Z]+', self.raw_text)
+        if possible_roots:
+            root = possible_roots[randint(0, len(possible_roots) - 1)].lower()
+        else:
+            root = self.raw_text.split(' ')[0].lower()
+        new_text = [root, ' ']
+
+        # DFS
+        def dfs(root, graph, len_text, memoize, visited=set()):
+            for v in graph[root.lower()]:
+                memoize.extend([v, ' '])
+                if len(memoize) < len_text:
+                    if v not in visited:
+                        visited.add(v)
+                        dfs(v, graph, len_text, memoize)
+                    else:
+                        visited.remove(v)
+                        memoize.pop()
+                        memoize.append('.')
+                else:
+                    memoize.pop()
+                    memoize.append('.')
+
+        dfs(root, text_lexical_graph, len(self.raw_text.split(' ')), new_text)
+        return ''.join(new_text)
+
+    @lru_cache(maxsize=256)
     def summarize(self, top_n=3, verbose=False):
         """
           Extracts a n chunk summary from the main text.
@@ -390,6 +425,9 @@ class Text:
 
     @staticmethod
     def split_by(text=''):
+        """
+            TO-BE-DONE
+        """
         text_chunks = []
 
         # TO-DO
@@ -422,6 +460,9 @@ class Text:
 
     @staticmethod
     def remove_non_unicode(text):
+        """
+            Remove non unicode characters from the text.
+        """
         return ''.join([i if ord(i) < 128 else '' for i in text])
 
     @staticmethod

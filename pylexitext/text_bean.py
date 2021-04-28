@@ -10,6 +10,8 @@ from nltk import RegexpParser
 # ------------------------------------------
 #          TEXT BEAN HELPER METHODS
 # ------------------------------------------
+
+
 def __sentence_similarity(sent1, sent2, stopwords=None):
     if stopwords is None:
         stopwords = []
@@ -121,3 +123,4 @@ def levenshtein_distance(sent1, sent2):
         vector2[all_words.index(w)] += 1
 
     return 1 - cosine_distance(vector1, vector2)
+
