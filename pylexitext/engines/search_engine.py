@@ -6,8 +6,10 @@ class SearchEngine():
     def __init__(self, text):
         self.text_chunks = []
         chunk_count = 1
-        for curr in text[100*chunk_count - 100:100*chunk_count]:
-            self.text_chunks.append(curr.lower())
+        n_chunks = round(len(text) / 100) + 1
+        while chunk_count <= n_chunks:
+            self.text_chunks.append(text[(100 * chunk_count) - 100:100 * chunk_count].lower())
+            chunk_count += 1
 
     def __magnitude(self, concordance):
         """
@@ -26,6 +28,7 @@ class SearchEngine():
         if not isinstance(query, str):
             raise ValueError("Query input must be a string")
 
+        print(self.text_chunks)
         query = SearchEngine.extract_concordance_dict(query.lower())
 
         results = []
@@ -37,10 +40,9 @@ class SearchEngine():
             for word, count in text_concordance.items():
                 if word in query:
                     topvalue += count * query[word]
-            if (self.__magnitude(text_concordance) * self.__magnitude(query)) != 0:
-                results.append((topvalue / (self.__magnitude(text_concordance) * self.__magnitude(query)), index))
+            results.append((topvalue / (self.__magnitude(text_concordance) * self.__magnitude(query)), index))
 
-        results.sort()
+        results.sort(reverse=True)
         return [(i[0], self.text_chunks[i[1]]) for i in results[0:top_n]]
 
     @staticmethod
