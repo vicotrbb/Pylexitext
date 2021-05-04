@@ -1,17 +1,64 @@
 import math
+import pkg_resources
 
 
 class SearchEngine():
 
-    def __init__(self, text):
-        self.text_chunks = []
-        chunk_count = 1
-        n_chunks = round(len(text) / 100) + 1
-        while chunk_count <= n_chunks:
-            self.text_chunks.append(text[(100 * chunk_count) - 100:100 * chunk_count].lower())
-            chunk_count += 1
+    def __init__(self, docs, match_threshold=0.0):
+        self.__docs = []
+        self.match_threshold = match_threshold
+        for doc in docs:
+            self.add_doc(doc)
 
-    def __magnitude(self, concordance):
+    def add_doc(self, doc) -> None:
+        """
+            Add a new document to the search engine portifolio.
+        """
+        if not isinstance(doc, str):
+            raise ValueError('A document must be a string')
+
+        self.__docs.append((doc, SearchEngine.extract_concordance_dict(doc)))
+
+    def remove_doc(self, doc_ix) -> set:
+        """
+            Remove a document from the portifolio by index.
+        """
+        if not isinstance(doc_ix, int):
+            raise ValueError(
+                'A document index must be a valid integer representing a document from the Search Engine documents portifolio')
+
+        return self.__docs.pop(doc_ix)
+
+    def get_docs(self) -> list:
+        """
+            Return a list of sets with all the documents and their indexes.
+        """
+        return [(k, v[0]) for k, v in enumerate(self.__docs)]
+
+    def save_to_file(self) -> None:
+        """
+            Dump the Search Engine documents portifolio data to a file.
+        """
+        pass
+
+    def load_from_file(self, file) -> None:
+        """
+            Load all the documents from a file.
+        """
+        pass
+
+    def convert_to_tensors(self):
+        print('Not yet implemented')
+
+        required = ('tensorflow')
+        installed = (pkg.key for pkg in pkg_resources.working_set)
+        missing = required - installed
+        if missing:
+            raise ImportError(f'The following dependencies are not installed: {required}')
+
+        return None
+
+    def __magnitude(self, concordance) -> float:
         """
         """
         if not isinstance(concordance, dict):
@@ -22,28 +69,34 @@ class SearchEngine():
             total += count ** 2
         return math.sqrt(total)
 
-    def search(self, query, top_n=1):
+    @staticmethod
+    def find_relation(query, search_object) -> float:
         """
+            Scores a relation between a search query and a target document. 
+            Higher the score, higher the similarity between the query and the document. 
         """
-        if not isinstance(query, str):
-            raise ValueError("Query input must be a string")
+        if isinstance(query, str):
+            query = SearchEngine.extract_concordance_dict(query)
+        elif not isinstance(query, dict):
+            raise ValueError("Query input must be a string or a concordance dict")
 
-        print(self.text_chunks)
-        query = SearchEngine.extract_concordance_dict(query.lower())
+        if isinstance(search_object, str):
+            search_object = SearchEngine.extract_concordance_dict(search_object)
+        elif not isinstance(search_object, dict):
+            raise ValueError("search_object input must be a string or a concordance dict")
 
-        results = []
-        for index, text in enumerate(self.text_chunks):
-            text_concordance = SearchEngine.extract_concordance_dict(text)
+        # relevance = 0
+        topvalue = 0
+        search_magnitude = SearchEngine.__magnitude(query) * SearchEngine.__magnitude(search_object)
 
-            # relevance = 0
-            topvalue = 0
-            for word, count in text_concordance.items():
-                if word in query:
-                    topvalue += count * query[word]
-            results.append((topvalue / (self.__magnitude(text_concordance) * self.__magnitude(query)), index))
+        if search_magnitude == 0:
+            return 0
 
-        results.sort(reverse=True)
-        return [(i[0], self.text_chunks[i[1]]) for i in results[0:top_n]]
+        for word, count in query.items():
+            if word in search_object:
+                topvalue += count * search_object[word]
+
+        return topvalue / search_magnitude
 
     @staticmethod
     def extract_concordance_dict(text) -> dict:
@@ -63,3 +116,15 @@ class SearchEngine():
             else:
                 con[i] += 1
         return con
+
+    def search(self, query, top_n=1) -> list:
+        """
+        """
+        search_results = []
+        query = SearchEngine.extract_concordance_dict(query)
+        for k, v in enumerate(self.__docs):
+            search_results.append(SearchEngine.find_relation(query, v[1]), k)
+
+        search_results.sort(reverse=True)
+        # Result set: (match score, doc id, doc text)
+        return [(i[0], i[1], self.__docs[i[1]][1]) for i in search_results[0:top_n]]
