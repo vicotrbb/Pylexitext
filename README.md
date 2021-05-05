@@ -168,7 +168,7 @@ sample.normalization()
 output:
 
 ```
-i'm code best application.
+im code best applic
 ```
 
 ## Static methods

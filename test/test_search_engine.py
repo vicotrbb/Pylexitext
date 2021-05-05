@@ -1,25 +1,85 @@
 import pytest
 from pylexitext.engines import SearchEngine
 
-text_sample = "I got a lot of questions about programming but i don't think they're the right questions to ask questions like. How many languages do i need to learn what language do i need to learn to get to company x what's the difference between a and b and which makes more money what are the exact steps i need to take. To become the. What kind of program should i write to build up my resume so why don't i like these questions because it feels like the people who are asking these questions they are learning how to program just for the sake of learning how to program. The program is just a tool. Being a programmer for me means you write code to automate things. Or to make things perform certain actions for example programming a refrigerator to turn on the light when you open the door. When you think about it. Programming is actually kind of boring. You're just giving a series of instructions to a machine over and over again until you get it right i don't want to speak for all of you. But i think it's a pay wasn't great i don't think a lot of you would spend hours and hours every night in front of the computer trying to learn how to code or to just debug your program sometimes we get caught up learning languages or doing coding challenges or fantasizing about you not working for these big tech companies that weforget why we wanted to learn programming in the first place. You wanted to program because you saw the amazing things that can be built using programming. So don't just learn how to program build something that matters build something that means something to you build something that solves a problem you're a problem solver a creator an innovator you're not a programmer programming is just a tool in your arsenal to build something amazing. You can be analytical trade of empathetic and programming allows you to express those qualities of yourself but programming in of itself is nothing special it's like a pencil it can mark stuff down if you press on the pencil hard enough. That's it but with a pencil you can write novels draw beautiful portraits build plans for a skyscraper or anything limited only by your imagination. You don't learn how to program to get into google. You learn how to program to build something meaningful something that helps real people with real problems i'm partnered of ibm today to talk about a global initiative called call for code which calls for developers to build something impactful and have a positive change across the world through their code as you know there are hundreds and hundreds of natural disasters every year like hurricanes and earthquakes floods volcanoes and wildfires those affect numerous lies and causes tremendous damage to many families around the world if you strive for real impact we desperately need you this is why 2018 call for code global challenge is a competition that ass people like you to build solutions to improve what we can do to reduce the destructive impact of his natural disasters we need all kinds of technologies."
+documents = [
+    '''At Scale You Will Hit Every Performance Issue I used to think I knew a bit about performance scalability and how to keep things trucking when you hit large amounts of data Truth is I know diddly squat on the subject since the most I have ever done is read about how its done To understand how I came about realising this you need some background''',
+    '''Richard Stallman to visit Australia Im not usually one to promote events and the like unless I feel there is a genuine benefit to be had by attending but this is one stands out Richard M Stallman the guru of Free Software is coming Down Under to hold a talk You can read about him here Open Source Celebrity to visit Australia''',
+    '''MySQL Backups Done Easily One thing that comes up a lot on sites like Stackoverflow and the like is how to backup MySQL databases The first answer is usually use mysqldump This is all fine and good till you start to want to dump multiple databases You can do this all in one like using the all databases option however this makes restoring a single database an issue since you have to parse out the parts you want which can be a pain''',
+    '''Why You Shouldnt roll your own CAPTCHA At a TechEd I attended a few years ago I was watching a presentation about Security presented by Rocky Heckman read his blog its quite good In it he was talking about security algorithms The part that really stuck with me went like this''',
+    '''The Great Benefit of Test Driven Development Nobody Talks About The feeling of productivity because you are writing lots of code Think about that for a moment Ask any developer who wants to develop why they became a developer One of the first things that comes up is I enjoy writing code This is one of the things that I personally enjoy doing Writing code any code especially when its solving my current problem makes me feel productive It makes me feel like Im getting somewhere Its empowering''',
+    '''Setting up GIT to use a Subversion SVN style workflow Moving from Subversion SVN to GIT can be a little confusing at first I think the biggest thing I noticed was that GIT doesnt have a specific workflow you have to pick your own Personally I wanted to stick to my Subversion like work-flow with a central server which all my machines would pull and push too Since it took a while to set up I thought I would throw up a blog post on how to do it''',
+]
 
 
 @pytest.fixture
-def text():
-    return SearchEngine(text_sample)
+def search_engine():
+    return SearchEngine(docs=documents)
 
 
-def test_health_check(text):
-    assert text is not None
+@pytest.fixture
+def concordance():
+    return SearchEngine.extract_concordance_dict(documents[0])
 
 
-def test_search(text):
-    pass
+def test_health_check():
+    try:
+        x = SearchEngine(docs=documents[0])
+        assert False
+    except:
+        assert True
 
 
-def test_magnitude(text):
-    pass
+def test_search(search_engine):
+    result = search_engine.search('feeling of productivity because you are writing lots of code')
+    assert result
+    assert len(result[0]) == 3
+    assert result[0][0] >= search_engine.match_threshold
 
 
-def test_extract_concordance_dict(text):
-    pass
+def test_treshold(search_engine):
+    search_engine.set_match_threshold(0.99)
+    result = search_engine.search('feeling of productivity because you are writing lots of code')
+    assert not result
+
+
+def test_add_document(search_engine):
+    old_len = len(search_engine.get_docs()) - 1
+    doc_to_add = '''Why CAPTCHA Never Use Numbers 0 1 5 7 Interestingly this sort of question pops up a lot in my referring search term stats Why CAPTCHAs never use the numbers 0 1 5 7 Its a relativity simple question with a reasonably simple answer Its because each of the above numbers are easy to confuse with a letter See the below'''
+    assert search_engine.add_doc(doc_to_add) > old_len
+
+
+def test_get_docs(search_engine):
+    sample = search_engine.get_docs()
+    assert len(sample) > 0
+    assert len(sample[0]) == 2
+
+
+def test_remove_doc(search_engine):
+    try:
+        assert search_engine.remove_doc(0) is not None
+    except:
+        assert False
+
+    try:
+        search_engine.remove_doc(9999999)
+        assert False
+    except:
+        assert True
+
+
+def test_extend_docs(search_engine):
+    old_len = len(search_engine.get_docs())
+    to_add = ['''The Great Benefit of Test Driven Development Nobody Talks About The feeling of productivity because you are writing lots of code Think about that for a moment Ask any developer who wants to develop why they became a developer One of the first things that comes up is I enjoy writing code This is one of the things that I personally enjoy doing Writing code any code especially when its solving my current problem makes me feel productive It makes me feel like Im getting somewhere Its empowering''',
+              '''Setting up GIT to use a Subversion SVN style workflow Moving from Subversion SVN to GIT can be a little confusing at first I think the biggest thing I noticed was that GIT doesnt have a specific workflow you have to pick your own Personally I wanted to stick to my Subversion like work-flow with a central server which all my machines would pull and push too Since it took a while to set up I thought I would throw up a blog post on how to do it''',
+              ]
+    search_engine.extend_docs(to_add)
+    assert len(search_engine.get_docs()) - old_len == 2
+
+
+def test_magnitude(concordance):
+    assert SearchEngine.magnitude(concordance) > 0
+
+
+def test_extract_concordance_dict(concordance):
+    assert concordance
+    assert isinstance(concordance, dict)

@@ -1,33 +1,63 @@
 import math
-import pkg_resources
+from datetime import datetime
+import json
+from typing import Iterable
+
+from numpy import iterable
 
 
 class SearchEngine():
 
-    def __init__(self, docs, match_threshold=0.0):
+    def __init__(self, docs=[], match_threshold=0.0):
         self.__docs = []
         self.match_threshold = match_threshold
         for doc in docs:
             self.add_doc(doc)
 
+    def __str__(self) -> str:
+        return str(self.get_docs())
+
+    def set_match_threshold(self, match_threshold) -> None:
+        """
+            Set a new match treshold of the search.
+        """
+        self.match_threshold = match_threshold
+
     def add_doc(self, doc) -> None:
         """
             Add a new document to the search engine portifolio.
+
+            Returns the index of the new document.
         """
         if not isinstance(doc, str):
             raise ValueError('A document must be a string')
 
+        if len(doc) == 0:
+            raise ValueError('A document can not be empty')
+        doc = doc.lower()
         self.__docs.append((doc, SearchEngine.extract_concordance_dict(doc)))
+
+        return len(self.__docs) - 1
+
+    def extend_docs(self, docs) -> None:
+        """
+            Extends the documents portifolio from an existing list.
+        """
+        if not isinstance(docs, list):
+            raise ValueError('The input array must be a list of documents')
+
+        for doc in docs:
+            self.add_doc(doc)
 
     def remove_doc(self, doc_ix) -> set:
         """
             Remove a document from the portifolio by index.
         """
-        if not isinstance(doc_ix, int):
+        if not isinstance(doc_ix, int) or len(self.__docs) <= doc_ix or (doc_ix != -1 and doc_ix < 0):
             raise ValueError(
                 'A document index must be a valid integer representing a document from the Search Engine documents portifolio')
 
-        return self.__docs.pop(doc_ix)
+        return self.__docs.pop(doc_ix)[0]
 
     def get_docs(self) -> list:
         """
@@ -35,31 +65,60 @@ class SearchEngine():
         """
         return [(k, v[0]) for k, v in enumerate(self.__docs)]
 
-    def save_to_file(self) -> None:
+    def save_to_file(self, file_name='') -> None:
         """
-            Dump the Search Engine documents portifolio data to a file.
+            Dump the Search Engine documents portifolio data to a json file.
+
+            Default file name pattern: '<todays datetime as %d-%m-%Y-%H-%M-%S>-search_engine-<number of documents>-docs.json'
         """
-        pass
+        if not file_name:
+            file_name = f'{datetime.now().strftime("%d-%m-%Y-%H-%M-%S")}-search_engine-{len(self.__docs)}-docs.json'
 
-    def load_from_file(self, file) -> None:
+        dto = {
+            'match_threshold': self.match_threshold,
+            'docs': self.__docs
+        }
+        with open(file_name, 'w') as json_file:
+            json.dump(dto, json_file)
+
+        return file_name
+
+    def load_from_file(self, file_name) -> None:
         """
-            Load all the documents from a file.
+            Load a Search Engine object from file.
         """
-        pass
+        with open(file_name, 'r') as json_file:
+            dto = json.load(json_file)
+            try:
+                self.__docs = dto['docs']
+                self.match_threshold = dto['match_threshold']
+            except:
+                raise SyntaxError('Json file malformed')
 
-    def convert_to_tensors(self):
-        print('Not yet implemented')
+        return self
 
-        required = ('tensorflow')
-        installed = (pkg.key for pkg in pkg_resources.working_set)
-        missing = required - installed
-        if missing:
-            raise ImportError(f'The following dependencies are not installed: {required}')
-
-        return None
-
-    def __magnitude(self, concordance) -> float:
+    def search(self, query, top_n=1) -> list:
         """
+            Searchs a string query on the documents portifolio.
+
+            Result set: [(match score, doc id, doc text)]
+        """
+        if not isinstance(query, str):
+            raise ValueError("Query must be a string")
+
+        search_results = []
+        query = SearchEngine.extract_concordance_dict(query.lower())
+        for k, v in enumerate(self.__docs):
+            search_results.append((SearchEngine.find_relation(query, v[1]), k))
+
+        search_results.sort(reverse=True)
+        # Result set: [(match score, doc id, doc text)]
+        return [(i[0], i[1], self.__docs[i[1]][0]) for i in search_results[0:top_n] if i[0] > self.match_threshold]
+
+    @staticmethod
+    def magnitude(concordance) -> float:
+        """
+            Calculates the n-dimensions vector space.
         """
         if not isinstance(concordance, dict):
             raise ValueError('Concordance input must be a dict')
@@ -72,8 +131,9 @@ class SearchEngine():
     @staticmethod
     def find_relation(query, search_object) -> float:
         """
-            Scores a relation between a search query and a target document. 
-            Higher the score, higher the similarity between the query and the document. 
+            Scores a relation between a search query and a target document.
+
+            Higher the score, higher the similarity between the query and the document.
         """
         if isinstance(query, str):
             query = SearchEngine.extract_concordance_dict(query)
@@ -87,7 +147,7 @@ class SearchEngine():
 
         # relevance = 0
         topvalue = 0
-        search_magnitude = SearchEngine.__magnitude(query) * SearchEngine.__magnitude(search_object)
+        search_magnitude = SearchEngine.magnitude(query) * SearchEngine.magnitude(search_object)
 
         if search_magnitude == 0:
             return 0
@@ -102,6 +162,7 @@ class SearchEngine():
     def extract_concordance_dict(text) -> dict:
         """
             Create a concordance dict from the input text.
+
             A concordance dict counts the number of occurences of a word. 
         """
         if isinstance(text, str):
@@ -116,15 +177,3 @@ class SearchEngine():
             else:
                 con[i] += 1
         return con
-
-    def search(self, query, top_n=1) -> list:
-        """
-        """
-        search_results = []
-        query = SearchEngine.extract_concordance_dict(query)
-        for k, v in enumerate(self.__docs):
-            search_results.append(SearchEngine.find_relation(query, v[1]), k)
-
-        search_results.sort(reverse=True)
-        # Result set: (match score, doc id, doc text)
-        return [(i[0], i[1], self.__docs[i[1]][1]) for i in search_results[0:top_n]]

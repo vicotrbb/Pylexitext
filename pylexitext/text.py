@@ -18,10 +18,6 @@ from .engines import SearchEngine
 
 class Text():
 
-    """
-
-    """
-
     def __init__(self, text, language='english', pre_process=True):
         self.__accepted_languages = ['english']
 
@@ -43,7 +39,13 @@ class Text():
     def __repr__(self):
         return self.describe()
 
+    def __str__(self):
+        return self.raw_text
+
     def set_lang(self, language='english'):
+        """
+            Defines the working language for the text.
+        """
         self.language = language
 
         if self.language != language:
@@ -138,21 +140,6 @@ class Text():
         self.flesch_kincaid_grade_level_score = self.flesch_kincaid_grade_level()
         self.smog_score = self.smog()
         self.gunning_fog_index_score = self.gunning_fog_index()
-
-    def search(self, query) -> set:
-        """
-            Searchs a query on the text using the Search Engine from Pylexitext.
-        """
-        search_instance = SearchEngine(self.raw_text)
-        output = search_instance.search(query)
-        del(search_instance)
-        return output
-
-    def create_search_engine_instance(self) -> SearchEngine:
-        """
-            Returns a SearchEngine instace with the raw text at the Text object.
-        """
-        return SearchEngine(self.raw_text)
 
     @lru_cache(maxsize=128)
     def topics_extraction(self):
@@ -376,6 +363,7 @@ class Text():
         self.bigrams = self.ngrams_extraction(n=2)
         return self.bigrams
 
+    @lru_cache(maxsize=128)
     def avg_sentence_length(self) -> int:
         """
             Calculates the avarage sentence length from the text.
