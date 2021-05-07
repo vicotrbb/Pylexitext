@@ -270,6 +270,10 @@ class Text():
 
     @lru_cache(maxsize=128)
     def sentiment_analysis(self, verbose=False, method='vader') -> dict:
+        """
+            Enable to perform sentiment analisys on the text.
+            Algorithms available: ['vader']
+        """
         if method == 'vader':
             from .sentiment import sentiment
 
@@ -283,6 +287,9 @@ class Text():
 
     @lru_cache(maxsize=128)
     def senteces_count(self) -> int:
+        """
+            Count the number of sentences of the text
+        """
         self.total_sentences = 0
         for sentece in self.sentences:
             if len(Text.remove_punctuation(text=sentece).split(' ')) > 2:
