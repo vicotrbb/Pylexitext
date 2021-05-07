@@ -10,6 +10,8 @@ from nltk import RegexpParser
 # ------------------------------------------
 #          TEXT BEAN HELPER METHODS
 # ------------------------------------------
+
+
 def __sentence_similarity(sent1, sent2, stopwords=None):
     if stopwords is None:
         stopwords = []

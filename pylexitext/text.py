@@ -1,3 +1,4 @@
+from typing import List
 from nltk.corpus import stopwords
 import networkx as nx
 from . import text_bean as bean
@@ -11,13 +12,11 @@ import nltk
 import re
 import string
 from functools import lru_cache
+from random import randint
+from .engines import SearchEngine
 
 
-class Text:
-
-    """
-
-    """
+class Text():
 
     def __init__(self, text, language='english', pre_process=True):
         self.__accepted_languages = ['english']
@@ -40,7 +39,13 @@ class Text:
     def __repr__(self):
         return self.describe()
 
+    def __str__(self):
+        return self.raw_text
+
     def set_lang(self, language='english'):
+        """
+            Defines the working language for the text.
+        """
         self.language = language
 
         if self.language != language:
@@ -107,12 +112,11 @@ class Text:
         self.total_sentences = self.senteces_count()
         self.text_size = len(self.text)
         self.words = Text.noise_removal(self.text).split(' ')
+        self.concordance = SearchEngine.extract_concordance_dict(self.words)
         self.total_words = len(self.words)
         self.char_count = len(self.text.replace(" ", ""))
-        self.stopwords_text = [word for word in self.text.split(
-            ' ') if word not in self.stopwords_set]
-        self.is_stopwords_text = [word for word in self.text.split(
-            ' ') if word in self.stopwords_set]
+        self.stopwords_text = [word for word in self.words if word not in self.stopwords_set]
+        self.is_stopwords_text = [word for word in self.words if word in self.stopwords_set]
         self.unique_terms = set(self.stopwords_text)
         self.text_uniques_number = len(self.unique_terms)
         self.text_sentences = self.text.split('.')
@@ -162,7 +166,7 @@ class Text:
     #     pass
 
     @lru_cache(maxsize=128)
-    def word_frequency_plot(self):
+    def word_frequency_plot(self) -> None:
         """
           Plots a word frequency line plot.
         """
@@ -177,7 +181,7 @@ class Text:
         pass
 
     @lru_cache(maxsize=128)
-    def lexical_graph(self):
+    def lexical_graph(self) -> dict:
         """
           Generates a lexical graph from the original clened text, this lexical graph is represented by all the unique terms from the cleaned text(including stopwords)
           as the Vertex and the edges are the possible connections between words from the text.
@@ -197,7 +201,7 @@ class Text:
 
         return lexical_graph
 
-    def lexical_graph_plot(self, size=(30, 24), dpi=80, **kwargs):
+    def lexical_graph_plot(self, size=(30, 24), dpi=80, **kwargs) -> None:
         """
             Plots a graph from the lexical graph method.
 
@@ -207,7 +211,36 @@ class Text:
         plt.lexical_graph(graph, size, dpi, kwargs)
 
     @lru_cache(maxsize=256)
-    def summarize(self, top_n=3, verbose=False):
+    def rearrange_text(self) -> str:
+        """
+            Rearrange the text to a new format, keeping the meaning and the lexical format.
+            UNDER WORK
+        """
+        print('This function is under development, and is not meant to be used as oficially ready.')
+        text_lexical_graph = self.lexical_graph()
+
+        possible_roots = re.findall(r'[A-Z][a-zA-Z]+', self.raw_text)
+        if possible_roots:
+            root = possible_roots[randint(0, len(possible_roots) - 1)].lower()
+        else:
+            root = self.raw_text.split(' ')[0].lower()
+        new_text = [root, ' ']
+
+        # DFS
+        def dfs(root, graph, len_text, memoize, visited=set()):
+            for v in graph[root.lower()]:
+                if len(memoize) < len_text:
+                    memoize.extend([v, ' '])
+                    dfs(v, graph, len_text, memoize)
+                else:
+                    memoize.pop()
+                    memoize.extend(['.'])
+
+        dfs(root, text_lexical_graph, len(self.raw_text.split(' ')), new_text)
+        return ''.join(new_text)
+
+    @lru_cache(maxsize=256)
+    def summarize(self, top_n=3, verbose=False) -> str:
         """
           Extracts a n chunk summary from the main text.
           Default n chunks = 3
@@ -236,7 +269,11 @@ class Text:
         return self.summary
 
     @lru_cache(maxsize=128)
-    def sentiment_analysis(self, verbose=False, method='vader'):
+    def sentiment_analysis(self, verbose=False, method='vader') -> dict:
+        """
+            Enable to perform sentiment analisys on the text.
+            Algorithms available: ['vader']
+        """
         if method == 'vader':
             from .sentiment import sentiment
 
@@ -249,7 +286,10 @@ class Text:
         pass
 
     @lru_cache(maxsize=128)
-    def senteces_count(self):
+    def senteces_count(self) -> int:
+        """
+            Count the number of sentences of the text
+        """
         self.total_sentences = 0
         for sentece in self.sentences:
             if len(Text.remove_punctuation(text=sentece).split(' ')) > 2:
@@ -275,7 +315,7 @@ class Text:
         return self.pos
 
     @lru_cache(maxsize=128)
-    def stemming(self):
+    def stemming(self) -> str:
         """
             Normalization method to return inflacted words to it's morphological original form.
             Ex: fishing, fished, and fisher -> fish
@@ -285,7 +325,7 @@ class Text:
         return self.stemmed_text
 
     @lru_cache(maxsize=256)
-    def normalization(self):
+    def normalization(self) -> str:
         """
             Normalizes a text using series of techniques
             Noise removal, stop words remoaval, stemming, word tokenization, lemmatization
@@ -310,7 +350,7 @@ class Text:
         pass
 
     @lru_cache(maxsize=256)
-    def ngrams_extraction(self, n=3):
+    def ngrams_extraction(self, n=3) -> list:
         """
             Perform a ngrams extraction on the text.
             ngrams = chunks of 'n' words from the text splited in lists
@@ -322,7 +362,7 @@ class Text:
         return out
 
     @lru_cache(maxsize=256)
-    def bigrams_extraction(self):
+    def bigrams_extraction(self) -> list:
         """
             Perform a bigrams extraction on the text.
             bigrams = chunks of 2 words from the text splited in lists
@@ -330,14 +370,15 @@ class Text:
         self.bigrams = self.ngrams_extraction(n=2)
         return self.bigrams
 
-    def avg_sentence_length(self):
+    @lru_cache(maxsize=128)
+    def avg_sentence_length(self) -> int:
         """
             Calculates the avarage sentence length from the text.
         """
         return round(float(self.total_words / self.total_sentences))
 
     @lru_cache(maxsize=128)
-    def term_frequency(self):
+    def term_frequency(self) -> list:
         """
             Performs an unique words frequency(%) count on the text. 
         """
@@ -352,7 +393,7 @@ class Text:
         return self.terms_frequency
 
     @lru_cache(maxsize=128)
-    def text_similarity(self, text):
+    def text_similarity(self, text) -> float:
         """
             Compares the raw text at the pylexitext Text object and the inputed text to compare, 
             returns the similarity as 0-1.
@@ -366,19 +407,19 @@ class Text:
     # -----------------------------------------
 
     @lru_cache(maxsize=128)
-    def flesch_reading_ease(self):
+    def flesch_reading_ease(self) -> float:
         return 206.835 - (1.015*(self.total_words/self.text_sentences_number)) - (84.7*(self.total_syllables/self.total_words))
 
     @lru_cache(maxsize=128)
-    def flesch_kincaid_grade_level(self):
+    def flesch_kincaid_grade_level(self) -> float:
         return (0.39*(self.total_words/self.text_sentences_number)) + (11.8*(self.total_syllables/self.total_words)) - 15.59
 
     @lru_cache(maxsize=128)
-    def smog(self):
+    def smog(self) -> float:
         return (1.0430*(np.sqrt(self.total_polysyllables*(30/self.text_sentences_number)))) + 3.1291
 
     @lru_cache(maxsize=128)
-    def gunning_fog_index(self):
+    def gunning_fog_index(self) -> float:
         """
             Under work
         """
@@ -389,7 +430,10 @@ class Text:
     # -----------------------------------------
 
     @staticmethod
-    def split_by(text=''):
+    def split_by(text='') -> list:
+        """
+            TO-BE-DONE
+        """
         text_chunks = []
 
         # TO-DO
@@ -397,7 +441,7 @@ class Text:
         return text_chunks
 
     @staticmethod
-    def remove_numbers(text=''):
+    def remove_numbers(text='') -> str:
         """
            Remove numbers from the text
         """
@@ -405,7 +449,7 @@ class Text:
         return re.sub(pattern, '', text)
 
     @staticmethod
-    def remove_punctuation(text=''):
+    def remove_punctuation(text='') -> str:
         """
            Remove ponctuation from the text
         """
@@ -413,7 +457,7 @@ class Text:
         return output
 
     @staticmethod
-    def remove_extra_whitespace_tabs(text):
+    def remove_extra_whitespace_tabs(text) -> str:
         """
            Remove extra white spaces and tabs from the text
         """
@@ -421,11 +465,14 @@ class Text:
         return re.sub(pattern, ' ', text).strip()
 
     @staticmethod
-    def remove_non_unicode(text):
+    def remove_non_unicode(text) -> str:
+        """
+            Remove non unicode characters from the text.
+        """
         return ''.join([i if ord(i) < 128 else '' for i in text])
 
     @staticmethod
-    def noise_removal(text):
+    def noise_removal(text) -> str:
         """
             Remove all the noise from the text, including:
                 * Numbers
@@ -444,7 +491,7 @@ class Text:
         return text
 
     @staticmethod
-    def sentence_similarity(sentence1, sentence2, percentage_base=False):
+    def sentence_similarity(sentence1, sentence2, percentage_base=False) -> float:
         """
            Compares two sentences and outputs the sentence similarity of them.
            The sentences similarity is calculated using the levenshtein distance method.

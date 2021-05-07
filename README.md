@@ -168,7 +168,7 @@ sample.normalization()
 output:
 
 ```
-i'm code best application.
+im code best applic
 ```
 
 ## Static methods
@@ -209,6 +209,89 @@ sentence_similarity('hello beautiful world', 'hello world')
 # You can get the output in 0-100% as well:
 sentence_similarity('hello beautiful world', 'hello world', percentage_base=True)
 # 85.99
+```
+
+## Engines
+
+Pylexitext provides a series of usefull Text Engines.
+
+### Search Engine
+
+The search engine provide an easy way to search for a query string match on list of documents, this documents should be "summaries" from bigger documents, that, one time
+found on the documents portifolio, could lead to the complete original document.
+
+The engine object itself hold the documents, and handle all the search protocol to find the desired document. A document search will have a relevance score, that quantifies how much the document matches with the search query. The match score have a treshold of 0 by default, that can be changed if needed, adding more confidence to the search, but reducing the number of results.
+
+Bellow an example of how to create the Engine object:
+
+```
+from pylexitext.engines import SearchEngine
+
+documents = [
+  '''At Scale You Will Hit Every Performance Issue I used to think I knew a bit about performance scalability and how to keep things trucking when you hit large amounts of data Truth is I know diddly squat on the subject since the most I have ever done is read about how its done To understand how I came about realising this you need some background''',
+  '''Richard Stallman to visit Australia Im not usually one to promote events and the like unless I feel there is a genuine benefit to be had by attending but this is one stands out Richard M Stallman the guru of Free Software is coming Down Under to hold a talk You can read about him here Open Source Celebrity to visit Australia''',
+  '''MySQL Backups Done Easily One thing that comes up a lot on sites like Stackoverflow and the like is how to backup MySQL databases The first answer is usually use mysqldump This is all fine and good till you start to want to dump multiple databases You can do this all in one like using the all databases option however this makes restoring a single database an issue since you have to parse out the parts you want which can be a pain'''
+]
+
+document =  '''The Great Benefit of Test Driven Development Nobody Talks About The feeling of productivity because you are writing lots of code Think about that for a moment Ask any developer who wants to develop why they became a developer One of the first things that comes up is I enjoy writing code This is one of the things that I personally enjoy doing Writing code any code especially when its solving my current problem makes me feel productive It makes me feel like Im getting somewhere Its empowering'''
+
+# By default, match_threshold is 0.0
+engine = SearchEngine(match_threshold=0.2)
+
+# Adds a single document to the Engine portifolio and returns the index of the document.
+engine.add_doc(document)
+
+# Adds a list of documents to the Engine portifolio.
+engine.extend_docs(documents)
+
+# We could remove a document using it's index:
+# engine.remove_doc(doc_ix=?)
+
+# To list the documents, we could use, that will return a list of sets with (doc index, document string):
+# engine.get_docs()
+
+# Search a string query on the Engine documents portifolio, by default, it returns the top 1 result.
+# To change the number of results, change the parameter 'top_n'
+engines.search('How to backup a MySQL database', top_n=2)
+```
+
+The search method will return the two best matchs for the query:
+
+```
+ [(0.39346959912353996,
+ 5,
+ 'setting up git to use a subversion svn style workflow moving from subversion svn to git can be a little confusing at first i think the biggest thing i noticed was that git doesnt have a specific workflow you have to pick your own personally i wanted to stick to my subversion like work-flow with a central server which all my machines would pull and push too since it took a while to set up i thought i would throw up a blog post on how to do it'),
+ (0.38138503569823695,
+  2,
+  'mysql backups done easily one thing that comes up a lot on sites like stackoverflow and the like is how to backup mysql databases the first answer is usually use mysqldump this is all fine and good till you start to want to dump multiple databases you can do this all in one like using the all databases option however this makes restoring a single database an issue since you have to parse out the parts you want which can be a pain')]
+```
+
+Other available methods are:
+
+```
+engine.save_to_file()
+# Dump the Search Engine object to a json file and returns the name of the generated document.
+# Default file_name pattern: '<todays datetime as %d-%m-%Y-%H-%M-%S>-search_engine-<number of documents>-docs.json'
+
+engine.load_from_file(file_name='<FILE NAME>.json')
+# Load a Search Engine object from json file.
+```
+
+### Static methods
+
+All the static methods available are related to the search process of the engine, and can be used as the example below:
+
+```
+SearchEngine.extract_concordance_dict('<DOCUMENT STRING>')
+# Create a concordance dict from the input text.
+# A concordance dict counts the number of occurences of a word.
+
+SearchEngine.magnitude(<CONCORDANCE DICT>)
+# Calculates the n-dimensions vector space from a concordance dict.
+
+SearchEngine.find_relation(query, <CONCORDANCE DICT>)
+# Scores the relation between a query and a concordance dict, it is used to search for top matchind documents
+# with the query.
 ```
 
 ## About Creator
