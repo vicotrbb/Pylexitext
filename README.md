@@ -1,6 +1,6 @@
 # Pylexitext
 
-<img src="https://img.shields.io/github/issues/vicotrbb/pylexitext"> <img src="https://img.shields.io/github/workflow/status/vicotrbb/Pylexitext/Python%20application"> <img src="https://img.shields.io/github/commit-activity/w/vicotrbb/Pylexitext">
+<img src="https://img.shields.io/github/issues/vicotrbb/pylexitext"> <img src="https://img.shields.io/github/workflow/status/vicotrbb/Pylexitext/Python%20application"> <img src="https://img.shields.io/github/commit-activity/w/vicotrbb/Pylexitext"> <img src="https://img.shields.io/pypi/dm/pylexitext">
 
 Pylexitext is a python library that aggregates a series of NLP methods, text analysis, content converters and other usefull stuff.
 
