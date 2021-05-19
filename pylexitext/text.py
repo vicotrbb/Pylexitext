@@ -13,7 +13,6 @@ import re
 import string
 from functools import lru_cache
 from random import randint
-from .engines import SearchEngine
 
 
 class Text():
@@ -112,7 +111,6 @@ class Text():
         self.total_sentences = self.senteces_count()
         self.text_size = len(self.text)
         self.words = Text.noise_removal(self.text).split(' ')
-        self.concordance = SearchEngine.extract_concordance_dict(self.words)
         self.total_words = len(self.words)
         self.char_count = len(self.text.replace(" ", ""))
         self.stopwords_text = [word for word in self.words if word not in self.stopwords_set]
